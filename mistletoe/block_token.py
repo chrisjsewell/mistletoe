@@ -164,8 +164,9 @@ class Heading(BlockToken):
     pattern = re.compile(r' {0,3}(#{1,6})(?:\n|\s+?(.*?)(?:\n|\s+?#+\s*?$))')
     level = 0
     content = ''
+
     def __init__(self, match):
-        self.level, content = match
+        self.level, content, self.range = match
         super().__init__(content, span_token.tokenize_inner)
 
     @classmethod
@@ -182,7 +183,7 @@ class Heading(BlockToken):
     @classmethod
     def read(cls, lines):
         next(lines)
-        return cls.level, cls.content
+        return cls.level, cls.content, (lines.lineno, lines.lineno)
 
 class SetextHeading(BlockToken):
     """
@@ -190,7 +191,8 @@ class SetextHeading(BlockToken):
     
     Not included in the parsing process, but called by Paragraph.__new__.
     """
-    def __init__(self, lines):
+    def __init__(self, result):
+        lines, self.range = result
         self.level = 1 if lines.pop().lstrip().startswith('=') else 2
         content = '\n'.join([line.strip() for line in lines])
         super().__init__(content, span_token.tokenize_inner)
@@ -208,7 +210,8 @@ class Quote(BlockToken):
     """
     Quote token. (["> # heading\\n", "> paragraph\\n"])
     """
-    def __init__(self, parse_buffer):
+    def __init__(self, result):
+        parse_buffer, self.range = result
         # span-level tokenizing happens here.
         self.children = tokenizer.make_tokens(parse_buffer)
 
@@ -222,6 +225,7 @@ class Quote(BlockToken):
     @classmethod
     def read(cls, lines):
         # first line
+        start_line = lines.lineno + 1
         line = cls.convert_leading_tabs(next(lines).lstrip()).split('>', 1)[1]
         if len(line) > 0 and line[0] == ' ':
             line = line[1:]
@@ -264,9 +268,10 @@ class Quote(BlockToken):
         # block level tokens are parsed here, so that footnotes
         # in quotes can be recognized before span-level tokenizing.
         Paragraph.parse_setext = False
-        parse_buffer = tokenizer.tokenize_block(line_buffer, _token_types)
+        # TODO headers in quotes?? 
+        parse_buffer = tokenizer.tokenize_block(line_buffer, _token_types, start_line)
         Paragraph.parse_setext = True
-        return parse_buffer
+        return parse_buffer, (start_line, lines.lineno)
 
     @staticmethod
     def convert_leading_tabs(string):
@@ -292,13 +297,15 @@ class Paragraph(BlockToken):
     setext_pattern = re.compile(r' {0,3}(=|-)+ *$')
     parse_setext = True  # can be disabled by Quote
 
-    def __new__(cls, lines):
-        if not isinstance(lines, list):
+    def __new__(cls, result):
+        if isinstance(result, SetextHeading):
             # setext heading token, return directly
-            return lines
+            return result
         return super().__new__(cls)
 
-    def __init__(self, lines):
+    def __init__(self, result):
+        lines, line_range = result
+        self.range = line_range
         content = ''.join([line.lstrip() for line in lines]).strip()
         super().__init__(content, span_token.tokenize_inner)
 
@@ -309,6 +316,7 @@ class Paragraph(BlockToken):
     @classmethod
     def read(cls, lines):
         line_buffer = [next(lines)]
+        start_line = lines.lineno
         next_line = lines.peek()
         while (next_line is not None
                 and next_line.strip() != ''
@@ -335,7 +343,7 @@ class Paragraph(BlockToken):
             # check if we see a setext underline
             if cls.parse_setext and cls.is_setext_heading(next_line):
                 line_buffer.append(next(lines))
-                return SetextHeading(line_buffer)
+                return SetextHeading((line_buffer, (start_line, lines.lineno)))
 
             # check if we have a ThematicBreak (has to be after setext)
             if ThematicBreak.start(next_line):
@@ -344,7 +352,7 @@ class Paragraph(BlockToken):
             # no other tokens, we're good
             line_buffer.append(next(lines))
             next_line = lines.peek()
-        return line_buffer
+        return line_buffer, (start_line, lines.lineno)
 
     @classmethod
     def is_setext_heading(cls, line):
@@ -359,7 +367,8 @@ class BlockCode(BlockToken):
         children (list): contains a single span_token.RawText token.
         language (str): always the empty string.
     """
-    def __init__(self, lines):
+    def __init__(self, result):
+        lines, self.range = result
         self.language = ''
         self.children = (span_token.RawText(''.join(lines).strip('\n')+'\n'),)
 
@@ -369,6 +378,7 @@ class BlockCode(BlockToken):
 
     @classmethod
     def read(cls, lines):
+        start_line = lines.lineno
         line_buffer = []
         for line in lines:
             if line.strip() == '':
@@ -378,7 +388,7 @@ class BlockCode(BlockToken):
                 lines.backstep()
                 break
             line_buffer.append(cls.strip(line))
-        return line_buffer
+        return line_buffer, (start_line, lines.lineno)
 
     @staticmethod
     def strip(string):
@@ -404,10 +414,11 @@ class CodeFence(BlockToken):
         children (list): contains a single span_token.RawText token.
         language (str): language of code block (default to empty).
     """
-    pattern = re.compile(r'( {0,3})((?:`|~){3,}) *(\S*)')
+    pattern = re.compile(r'( {0,3})((?:`|~){3,}) *(\S*)\s*(.+)')
     _open_info = None
     def __init__(self, match):
-        lines, open_info = match
+        lines, open_info, self.range = match
+        self.options = open_info[3]
         self.language = span_token.EscapeSequence.strip(open_info[2])
         self.children = (span_token.RawText(''.join(lines)),)
 
@@ -416,14 +427,15 @@ class CodeFence(BlockToken):
         match_obj = cls.pattern.match(line)
         if not match_obj:
             return False
-        prepend, leader, lang = match_obj.groups()
+        prepend, leader, lang, options = match_obj.groups()
         if leader[0] in lang or leader[0] in line[match_obj.end():]:
             return False
-        cls._open_info = len(prepend), leader, lang
+        cls._open_info = len(prepend), leader, lang, options
         return True
 
     @classmethod
     def read(cls, lines):
+        start_line = lines.lineno
         next(lines)
         line_buffer = []
         for line in lines:
@@ -436,7 +448,7 @@ class CodeFence(BlockToken):
             if diff > cls._open_info[0]:
                 stripped_line = ' ' * (diff - cls._open_info[0]) + stripped_line
             line_buffer.append(stripped_line)
-        return line_buffer, cls._open_info
+        return line_buffer, cls._open_info, (start_line, lines.lineno)
 
 
 class List(BlockToken):
@@ -557,7 +569,7 @@ class ListItem(BlockToken):
             line_buffer.append(line[prepend:])
         next_line = lines.peek()
         if empty_first_line and next_line is not None and next_line.strip() == '':
-            parse_buffer = tokenizer.tokenize_block([next(lines)], _token_types)
+            parse_buffer = tokenizer.tokenize_block([next(lines)], _token_types, lines.lineno)
             next_line = lines.peek()
             if next_line is not None:
                 marker_info = cls.parse_marker(next_line)
@@ -619,7 +631,8 @@ class Table(BlockToken):
         column_align (list): align options for each column (default to [None]).
         children (list): inner tokens (TableRows).
     """
-    def __init__(self, lines):
+    def __init__(self, result):
+        lines, self.range = result
         if '---' in lines[1]:
             self.column_align = [self.parse_align(column)
                     for column in self.split_delimiter(lines[1])]
@@ -660,6 +673,7 @@ class Table(BlockToken):
 
     @staticmethod
     def read(lines):
+        start_line = lines.lineno + 1
         lines.anchor()
         line_buffer = [next(lines)]
         while lines.peek() is not None and '|' in lines.peek():
@@ -667,7 +681,7 @@ class Table(BlockToken):
         if len(line_buffer) < 2 or '---' not in line_buffer[1]:
             lines.reset()
             return None
-        return line_buffer
+        return line_buffer, (start_line, lines.lineno)
 
 
 class TableRow(BlockToken):

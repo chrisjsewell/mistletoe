@@ -4,10 +4,15 @@ Block-level tokenizer for mistletoe.
 
 
 class FileWrapper:
-    def __init__(self, lines):
+    def __init__(self, lines, start_line=0):
         self.lines = lines if isinstance(lines, list) else list(lines)
         self._index = -1
         self._anchor = 0
+        self.start_line = start_line
+
+    @property
+    def lineno(self):
+        return self.start_line + self._index
 
     def __next__(self):
         if self._index + 1 < len(self.lines):
@@ -51,14 +56,14 @@ def tokenize(iterable, token_types):
     return make_tokens(tokenize_block(iterable, token_types))
 
 
-def tokenize_block(iterable, token_types):
+def tokenize_block(iterable, token_types, start_line=0):
     """
     Returns a list of pairs (token_type, read_result).
 
     Footnotes are parsed here, but span-level parsing has not
     started yet.
     """
-    lines = FileWrapper(iterable)
+    lines = FileWrapper(iterable, start_line)
     parse_buffer = ParseBuffer()
     line = lines.peek()
     while line is not None:
