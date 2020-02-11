@@ -165,6 +165,28 @@ def test_list_item(renderer):
     )
 
 
+def test_math(renderer):
+    render_token(renderer, "Math", content="$a$")
+    assert renderer.document.pformat() == dedent(
+        """\
+    <document source="">
+        <math>
+            a
+    """
+    )
+
+
+def test_math_block(renderer):
+    render_token(renderer, "Math", content="$$a$$")
+    assert renderer.document.pformat() == dedent(
+        """\
+    <document source="">
+        <math_block xml:space="preserve">
+            a
+    """
+    )
+
+
 def test_full_run(renderer, file_regression):
     string = dedent(
         """\

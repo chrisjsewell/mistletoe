@@ -12,6 +12,7 @@ import yaml
 
 from mistletoe import Document
 from mistletoe.base_renderer import BaseRenderer
+from mistletoe.latex_token import Math
 
 # from mistletoe import block_token, span_token
 
@@ -33,7 +34,7 @@ class DocutilsRenderer(BaseRenderer):
         self._directive_regex = re.compile(r"^\{.*\}\+?$")
         get_language(language)
         self._level_to_elem = {0: self.document}
-        super().__init__(*chain((), extras))
+        super().__init__(*chain((Math,), extras))
 
     @staticmethod
     def load_sphinx_components():
@@ -116,6 +117,15 @@ class DocutilsRenderer(BaseRenderer):
     def render_thematic_break(self, token):
         self.current_node.append(nodes.transition())
 
+    def render_math(self, token):
+        if token.content.startswith("$$"):
+            content = token.content[2:-2]
+            node = nodes.math_block(content, content)
+        else:
+            content = token.content[1:-1]
+            node = nodes.math(content, content)
+        self.current_node.append(node)
+
     def render_block_code(self, token):
         if self._directive_regex.match(token.language):
             return self.render_directive(token)
@@ -179,6 +189,7 @@ class DocutilsRenderer(BaseRenderer):
     def render_link(self, token):
         ref_node = nodes.reference()
         # Check destination is supported for cross-linking and remove extension
+        # TODO escape urls?
         destination = token.target
         _, ext = splitext(destination)
         # TODO check for other supported extensions, such as those specified in
@@ -318,7 +329,7 @@ class DocutilsRenderer(BaseRenderer):
             return
 
         try:
-            arguments = parse_directive_arguments(directive_class, token.arguments)
+            arguments = self.parse_directive_arguments(directive_class, token.arguments)
         except RuntimeError:
             # TODO handle/report error
             raise
@@ -366,25 +377,25 @@ class DocutilsRenderer(BaseRenderer):
             )
         self.current_node += result
 
-
-def parse_directive_arguments(directive, arg_text):
-    required = directive.required_arguments
-    optional = directive.optional_arguments
-    arguments = arg_text.split()
-    if len(arguments) < required:
-        raise RuntimeError(
-            "{} argument(s) required, {} supplied".format(required, len(arguments))
-        )
-    elif len(arguments) > required + optional:
-        if directive.final_argument_whitespace:
-            arguments = arg_text.split(None, required + optional - 1)
-        else:
+    @staticmethod
+    def parse_directive_arguments(directive, arg_text):
+        required = directive.required_arguments
+        optional = directive.optional_arguments
+        arguments = arg_text.split()
+        if len(arguments) < required:
             raise RuntimeError(
-                "maximum {} argument(s) allowed, {} supplied".format(
-                    required + optional, len(arguments)
-                )
+                "{} argument(s) required, {} supplied".format(required, len(arguments))
             )
-    return arguments
+        elif len(arguments) > required + optional:
+            if directive.final_argument_whitespace:
+                arguments = arg_text.split(None, required + optional - 1)
+            else:
+                raise RuntimeError(
+                    "maximum {} argument(s) allowed, {} supplied".format(
+                        required + optional, len(arguments)
+                    )
+                )
+        return arguments
 
 
 class MockState:
