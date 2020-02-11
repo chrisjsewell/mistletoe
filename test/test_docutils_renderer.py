@@ -234,9 +234,9 @@ def test_docutils_directives(renderer, directive):
             ]
         )[0]
     )
-    # print(
-    #     repr(renderer.document.pformat()).replace(" " * 8, "    ").replace('"', '\\"')
-    # )
+    print(
+        repr(renderer.document.pformat()).replace(" " * 8, "    ").replace('"', '\\"')
+    )
     assert renderer.document.pformat() == (
         directive.get("doc_tag", '<document source="">')
         + "\n"

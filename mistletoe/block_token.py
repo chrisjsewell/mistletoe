@@ -433,7 +433,7 @@ class CodeFence(BlockToken):
         language (str): language of code block (default to empty).
     """
 
-    pattern = re.compile(r"( {0,3})((?:`|~){3,}) *([^`~\s]*) *([^`~\s]*)")
+    pattern = re.compile(r"( {0,3})((?:`|~){3,}) *([^`~\s]*) *([^`~]*)")
     _open_info = None
 
     def __init__(self, match):
@@ -1011,5 +1011,6 @@ class HTMLBlock(BlockToken):
         return line_buffer
 
 
+# TODO make thread safe
 _token_types = []
 reset_tokens()

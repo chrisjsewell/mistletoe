@@ -67,21 +67,21 @@
         "class": "docutils.parsers.rst.directives.admonitions.Admonition",
         "args": ["myclass"],
         "options": {},
-        "output": "<admonition classes=\"admonition-myclass\">\n    <title>"
+        "output": "<admonition classes=\"admonition-myclass\">\n    <title>\n        myclass"
     },
     {
         "name": "sidebar",
         "class": "docutils.parsers.rst.directives.body.Sidebar",
         "args": ["sidebar title"],
         "options": {},
-        "output": "<sidebar>\n    <title>"
+        "output": "<sidebar>\n    <title>\n        sidebar title"
     },
     {
         "name": "topic",
         "class": "docutils.parsers.rst.directives.body.Topic",
-        "args": [],
+        "args": ["Topic Title"],
         "options": {},
-        "output": "<topic>\n    <title>"
+        "output": "<topic>\n    <title>\n        Topic Title"
     },
     {
         "name": "line-block",
@@ -100,9 +100,9 @@
     {
         "name": "rubric",
         "class": "docutils.parsers.rst.directives.body.Rubric",
-        "args": [],
+        "args": ["Rubric Title"],
         "options": {},
-        "output": "<rubric>"
+        "output": "<rubric>\n    Rubric Title"
     },
     {
         "name": "epigraph",
@@ -163,9 +163,9 @@
     {
         "name": "raw",
         "class": "docutils.parsers.rst.directives.misc.Raw",
-        "args": [],
+        "args": ["raw"],
         "options": {},
-        "output": "<raw format=\"\" xml:space=\"preserve\">"
+        "output": "<raw format=\"raw\" xml:space=\"preserve\">"
     },
     {
         "name": "replace",
@@ -219,14 +219,14 @@
         "class": "docutils.parsers.rst.directives.misc.TestDirective",
         "args": [],
         "options": {},
-        "output": "<system_message level=\"1\" line=\"-1\" source=\"\" type=\"INFO\">\n    <paragraph>\n        Directive processed. Type=\"restructuredtext-test-directive\", arguments=[''], options={}, content:\n    <literal_block xml:space=\"preserve\">"
+        "output": "<system_message level=\"1\" line=\"-1\" source=\"\" type=\"INFO\">\n    <paragraph>\n        Directive processed. Type=\"restructuredtext-test-directive\", arguments=[], options={}, content:\n    <literal_block xml:space=\"preserve\">"
     },
     {
         "name": "contents",
         "class": "docutils.parsers.rst.directives.parts.Contents",
         "args": [],
         "options": {},
-        "output": "<topic classes=\"contents\" ids=\"id1\" names=\"\">\n    <title>\n    <pending>\n        .. internal attributes:\n             .transform: docutils.transforms.parts.Contents\n             .details:"
+        "output": "<topic classes=\"contents\" ids=\"contents\" names=\"contents\">\n    <title>\n        Contents\n    <pending>\n        .. internal attributes:\n             .transform: docutils.transforms.parts.Contents\n             .details:"
     },
     {
         "name": "sectnum",

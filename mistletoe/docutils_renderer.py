@@ -35,6 +35,26 @@ class DocutilsRenderer(BaseRenderer):
         self._level_to_elem = {0: self.document}
         super().__init__(*chain((), extras))
 
+    @staticmethod
+    def load_sphinx_components():
+        """Load sphinx roles, directives, etc."""
+        from sphinx.registry import SphinxComponentRegistry
+        from sphinx.application import builtin_extensions, Sphinx
+        from sphinx.config import Config
+        from sphinx.events import EventManager
+
+        class MockSphinx(Sphinx):
+            def __init__(self):
+                self.registry = SphinxComponentRegistry()
+                self.config = Config({}, {})
+                self.events = EventManager(self)
+                self.html_themes = {}
+                self.extensions = {}
+                for extension in builtin_extensions:
+                    self.registry.load_extension(self, extension)
+
+        return MockSphinx()
+
     def render_children(self, token):
         for child in token.children:
             self.render(child)
@@ -297,12 +317,18 @@ class DocutilsRenderer(BaseRenderer):
             self.current_node += messages
             return
 
+        try:
+            arguments = parse_directive_arguments(directive_class, token.arguments)
+        except RuntimeError:
+            # TODO handle/report error
+            raise
+
         state_machine = MockStateMachine(self, token.range[0])
 
         directive_instance = directive_class(
             name=name,
             # the list of positional arguments
-            arguments=[token.arguments],  # TODO how/when to split multiple arguments?
+            arguments=arguments,
             # a dictionary mapping option names to values
             # TODO option parsing
             options=options,
@@ -341,6 +367,26 @@ class DocutilsRenderer(BaseRenderer):
         self.current_node += result
 
 
+def parse_directive_arguments(directive, arg_text):
+    required = directive.required_arguments
+    optional = directive.optional_arguments
+    arguments = arg_text.split()
+    if len(arguments) < required:
+        raise RuntimeError(
+            "{} argument(s) required, {} supplied".format(required, len(arguments))
+        )
+    elif len(arguments) > required + optional:
+        if directive.final_argument_whitespace:
+            arguments = arg_text.split(None, required + optional - 1)
+        else:
+            raise RuntimeError(
+                "maximum {} argument(s) allowed, {} supplied".format(
+                    required + optional, len(arguments)
+                )
+            )
+    return arguments
+
+
 class MockState:
     def __init__(self, renderer, state_machine, lineno):
         self._renderer = renderer
@@ -369,9 +415,13 @@ class MockState:
         nested_renderer.render(Document(block))
 
     def inline_text(self, text, lineno):
-        # TODO inline_text
         messages = []
+        renderer = DocutilsRenderer(language=self._renderer.language_module)
+        document = renderer.render(Document(text))
         textnodes = []
+        if document.children:
+            # first child should be paragraph
+            textnodes = document.children[0].children
         return textnodes, messages
 
     def block_quote(self, indented, line_offset):
