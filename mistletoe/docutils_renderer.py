@@ -303,11 +303,13 @@ class DocutilsRenderer(BaseRenderer):
             raise
         assert isinstance(
             result, list
-        ), f'Directive "{name}" must return a list of nodes.'
+        ), 'Directive "{}" must return a list of nodes.'.format(name)
         for i in range(len(result)):
             assert isinstance(
                 result[i], nodes.Node
-            ), f'Directive "{name}" returned non-Node object (index {i}): {result[i]}'
+            ), 'Directive "{}" returned non-Node object (index {}): {}'.format(
+                name, i, result[i]
+            )
         self.current_node += result
 
 
