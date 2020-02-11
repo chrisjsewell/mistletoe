@@ -433,12 +433,11 @@ class CodeFence(BlockToken):
         language (str): language of code block (default to empty).
     """
 
-    pattern = re.compile(r"( {0,3})((?:`|~){3,}) *(\S*)\s*(\S*)")
+    pattern = re.compile(r"( {0,3})((?:`|~){3,}) *(\S*)")
     _open_info = None
 
     def __init__(self, match):
         lines, open_info, self.range = match
-        self.options = open_info[3]
         self.language = span_token.EscapeSequence.strip(open_info[2])
         self.children = (span_token.RawText("".join(lines)),)
 
@@ -447,10 +446,10 @@ class CodeFence(BlockToken):
         match_obj = cls.pattern.match(line)
         if not match_obj:
             return False
-        prepend, leader, lang, options = match_obj.groups()
+        prepend, leader, lang = match_obj.groups()
         if leader[0] in lang or leader[0] in line[match_obj.end() :]:
             return False
-        cls._open_info = len(prepend), leader, lang, options
+        cls._open_info = len(prepend), leader, lang
         return True
 
     @classmethod
