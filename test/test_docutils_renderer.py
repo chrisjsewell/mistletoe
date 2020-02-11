@@ -187,6 +187,17 @@ def test_math_block(renderer):
     )
 
 
+def test_role_code(renderer):
+    renderer.render(tokenize_inner("{code}`` a=1{`} ``")[0])
+    assert renderer.document.pformat() == dedent(
+        """\
+    <document source="">
+        <literal classes="code">
+            a=1{`}
+    """
+    )
+
+
 def test_full_run(renderer, file_regression):
     string = dedent(
         """\

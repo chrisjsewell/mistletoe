@@ -4,8 +4,10 @@ import re
 from urllib.parse import urlparse, unquote
 
 from docutils import nodes
+from docutils.frontend import OptionParser
 from docutils.languages import get_language
-from docutils.parsers.rst import directives, DirectiveError
+from docutils.parsers.rst import directives, DirectiveError, roles
+from docutils.parsers.rst import Parser as RSTParser
 from docutils.utils import new_document
 from sphinx import addnodes
 import yaml
@@ -14,27 +16,44 @@ from mistletoe import Document
 from mistletoe.base_renderer import BaseRenderer
 from mistletoe.latex_token import Math
 
-# from mistletoe import block_token, span_token
+from mistletoe import span_token
+
+
+class Role(span_token.SpanToken):
+    """
+    Inline role tokens. ("{name}`some code`")
+    """
+
+    pattern = re.compile(
+        r"(?<!\\|`)(?:\\\\)*{([-_0-9a-zA-A]*)}(`+)(?!`)(.+?)(?<!`)\2(?!`)", re.DOTALL
+    )
+    parse_inner = False
+    precedence = 6  # higher precedence than InlineCode
+
+    def __init__(self, match):
+        self.name = match.group(1)
+        content = match.group(3)
+        self.children = (
+            span_token.RawText(" ".join(re.split("[ \n]+", content.strip()))),
+        )
 
 
 class DocutilsRenderer(BaseRenderer):
-    def __init__(self, extras=(), document=None, language="en", current_node=None):
+    def __init__(self, extras=(), document=None, current_node=None):
         """
         Args:
             extras (list): allows subclasses to add even more custom tokens.
         """
         self.document = document
         if self.document is None:
-            self.document = new_document("", settings=None)
-            # used by raw directive:
-            self.document.settings.raw_enabled = True
-            self.document.settings.file_insertion_enabled = True
+            settings = OptionParser(components=(RSTParser,)).get_default_values()
+            self.document = new_document("", settings=settings)
         self.current_node = current_node or self.document
-        self.language_module = language
+        self.language_module = self.document.settings.language_code
+        get_language(self.language_module)
         self._directive_regex = re.compile(r"^\{.*\}\+?$")
-        get_language(language)
         self._level_to_elem = {0: self.document}
-        super().__init__(*chain((Math,), extras))
+        super().__init__(*chain((Math, Role), extras))
 
     @staticmethod
     def load_sphinx_components():
@@ -298,6 +317,30 @@ class DocutilsRenderer(BaseRenderer):
     def render_auto_link(self, token):
         raise NotImplementedError
 
+    def render_role(self, token):
+        content = token.children[0].content
+        name = token.name
+        # TODO role name white/black lists
+        lineno = 0  # TODO get line number
+        inliner = MockInliner(self)
+        role_func, messages = roles.role(
+            name, self.language_module, lineno, self.document.reporter
+        )
+        rawsource = ":{}:`{}`".format(name, content)
+        # # backslash escapes converted to nulls (``\x00``)
+        text = span_token.EscapeSequence.strip(content)
+        if role_func:
+            nodes, messages2 = role_func(name, rawsource, text, lineno, inliner)
+            # return nodes, messages + messages2
+            self.current_node += nodes
+        else:
+            message = self.document.reporter.error(
+                'Unknown interpreted text role "{}".'.format(name), line=lineno
+            )
+            # return ([self.problematic(content, content, msg)], messages + [msg])
+            problematic = inliner.problematic(text, rawsource, message)
+            self.current_node += problematic
+
     def render_directive(self, token):
         name = token.language[1:-1]
         content = token.children[0].content
@@ -398,6 +441,22 @@ class DocutilsRenderer(BaseRenderer):
         return arguments
 
 
+class MockInliner:
+    def __init__(self, renderer):
+        self._renderer = renderer
+        self.document = renderer.document
+        self.reporter = renderer.document.reporter
+        self.parent = renderer.current_node
+        self.language = renderer.language_module
+
+    def problematic(self, text, rawsource, message):
+        msgid = self.document.set_id(message, self.parent)
+        problematic = nodes.problematic(rawsource, rawsource, refid=msgid)
+        prbid = self.document.set_id(problematic)
+        message.add_backref(prbid)
+        return problematic
+
+
 class MockState:
     def __init__(self, renderer, state_machine, lineno):
         self._renderer = renderer
@@ -416,18 +475,14 @@ class MockState:
     ):
         current_match_titles = self.state_machine.match_titles
         self.state_machine.match_titles = match_titles
-        nested_renderer = DocutilsRenderer(
-            document=self.document,
-            language=self._renderer.language_module,
-            current_node=node,
-        )
+        nested_renderer = DocutilsRenderer(document=self.document, current_node=node)
         self.state_machine.match_titles = current_match_titles
         # TODO deal with starting line number
         nested_renderer.render(Document(block))
 
     def inline_text(self, text, lineno):
         messages = []
-        renderer = DocutilsRenderer(language=self._renderer.language_module)
+        renderer = DocutilsRenderer()
         document = renderer.render(Document(text))
         textnodes = []
         if document.children:
