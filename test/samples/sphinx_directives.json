@@ -1,0 +1,476 @@
+[
+    {
+        "name": "attention",
+        "class": "docutils.parsers.rst.directives.admonitions.Attention",
+        "args": [],
+        "options": {},
+        "output": "<attention>"
+    },
+    {
+        "name": "caution",
+        "class": "docutils.parsers.rst.directives.admonitions.Caution",
+        "args": [],
+        "options": {},
+        "output": "<caution>"
+    },
+    {
+        "name": "danger",
+        "class": "docutils.parsers.rst.directives.admonitions.Danger",
+        "args": [],
+        "options": {},
+        "output": "<danger>"
+    },
+    {
+        "name": "error",
+        "class": "docutils.parsers.rst.directives.admonitions.Error",
+        "args": [],
+        "options": {},
+        "output": "<error>"
+    },
+    {
+        "name": "important",
+        "class": "docutils.parsers.rst.directives.admonitions.Important",
+        "args": [],
+        "options": {},
+        "output": "<important>"
+    },
+    {
+        "name": "note",
+        "class": "docutils.parsers.rst.directives.admonitions.Note",
+        "args": [],
+        "options": {},
+        "output": "<note>"
+    },
+    {
+        "name": "tip",
+        "class": "docutils.parsers.rst.directives.admonitions.Tip",
+        "args": [],
+        "options": {},
+        "output": "<tip>"
+    },
+    {
+        "name": "hint",
+        "class": "docutils.parsers.rst.directives.admonitions.Hint",
+        "args": [],
+        "options": {},
+        "output": "<hint>"
+    },
+    {
+        "name": "warning",
+        "class": "docutils.parsers.rst.directives.admonitions.Warning",
+        "args": [],
+        "options": {},
+        "output": "<warning>"
+    },
+    {
+        "name": "admonition",
+        "class": "docutils.parsers.rst.directives.admonitions.Admonition",
+        "args": ["myclass"],
+        "options": {},
+        "output": "<admonition classes=\"admonition-myclass\">\n    <title>"
+    },
+    {
+        "name": "sidebar",
+        "class": "docutils.parsers.rst.directives.body.Sidebar",
+        "args": ["sidebar title"],
+        "options": {},
+        "output": "<sidebar>\n    <title>"
+    },
+    {
+        "name": "topic",
+        "class": "docutils.parsers.rst.directives.body.Topic",
+        "args": [],
+        "options": {},
+        "output": "<topic>\n    <title>"
+    },
+    {
+        "name": "line-block",
+        "class": "docutils.parsers.rst.directives.body.LineBlock",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "parsed-literal",
+        "class": "docutils.parsers.rst.directives.body.ParsedLiteral",
+        "args": [],
+        "options": {},
+        "output": "<literal_block xml:space=\"preserve\">"
+    },
+    {
+        "name": "rubric",
+        "class": "docutils.parsers.rst.directives.body.Rubric",
+        "args": [],
+        "options": {},
+        "output": "<rubric>"
+    },
+    {
+        "name": "epigraph",
+        "class": "docutils.parsers.rst.directives.body.Epigraph",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "highlights",
+        "class": "docutils.parsers.rst.directives.body.Highlights",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "pull-quote",
+        "class": "docutils.parsers.rst.directives.body.PullQuote",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "compound",
+        "class": "docutils.parsers.rst.directives.body.Compound",
+        "args": [],
+        "options": {},
+        "output": "<compound>"
+    },
+    {
+        "name": "container",
+        "class": "docutils.parsers.rst.directives.body.Container",
+        "args": [],
+        "options": {},
+        "output": "<container>"
+    },
+    {
+        "name": "image",
+        "class": "docutils.parsers.rst.directives.images.Image",
+        "args": ["path/to/image"],
+        "options": {},
+        "output": "<image uri=\"path/to/image\">"
+    },
+    {
+        "name": "cssclass",
+        "class": "docutils.parsers.rst.directives.misc.Class",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "rst-class",
+        "class": "docutils.parsers.rst.directives.misc.Class",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "raw",
+        "class": "docutils.parsers.rst.directives.misc.Raw",
+        "args": [],
+        "options": {},
+        "output": "<raw format=\"\" xml:space=\"preserve\">"
+    },
+    {
+        "name": "replace",
+        "class": "docutils.parsers.rst.directives.misc.Replace",
+        "args": [],
+        "options": {},
+        "output": "",
+        "sub_only": true
+    },
+    {
+        "name": "unicode",
+        "class": "docutils.parsers.rst.directives.misc.Unicode",
+        "args": [],
+        "options": {},
+        "output": "",
+        "sub_only": true
+    },
+    {
+        "name": "class",
+        "class": "docutils.parsers.rst.directives.misc.Class",
+        "args": ["myclass"],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "role",
+        "class": "docutils.parsers.rst.directives.misc.Role",
+        "args": ["myrole"],
+        "content": "",
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "title",
+        "class": "docutils.parsers.rst.directives.misc.Title",
+        "args": ["title"],
+        "options": {},
+        "output": "",
+        "doc_tag": "<document source=\"\" title=\"title\">"
+    },
+    {
+        "name": "date",
+        "class": "docutils.parsers.rst.directives.misc.Date",
+        "args": [],
+        "options": {},
+        "output": "",
+        "sub_only": true
+    },
+    {
+        "name": "restructuredtext-test-directive",
+        "class": "docutils.parsers.rst.directives.misc.TestDirective",
+        "args": [],
+        "options": {},
+        "output": "<system_message level=\"1\" line=\"-1\" source=\"\" type=\"INFO\">\n    <paragraph>\n        Directive processed. Type=\"restructuredtext-test-directive\", arguments=[''], options={}, content:\n    <literal_block xml:space=\"preserve\">"
+    },
+    {
+        "name": "contents",
+        "class": "docutils.parsers.rst.directives.parts.Contents",
+        "args": [],
+        "options": {},
+        "output": "<topic classes=\"contents\" ids=\"id1\" names=\"\">\n    <title>\n    <pending>\n        .. internal attributes:\n             .transform: docutils.transforms.parts.Contents\n             .details:"
+    },
+    {
+        "name": "sectnum",
+        "class": "docutils.parsers.rst.directives.parts.Sectnum",
+        "args": [],
+        "options": {},
+        "output": "<pending>\n    .. internal attributes:\n         .transform: docutils.transforms.parts.SectNum\n         .details:"
+    },
+    {
+        "name": "header",
+        "class": "docutils.parsers.rst.directives.parts.Header",
+        "args": [],
+        "options": {},
+        "output": "<decoration>\n    <header>"
+    },
+    {
+        "name": "footer",
+        "class": "docutils.parsers.rst.directives.parts.Footer",
+        "args": [],
+        "options": {},
+        "output": "<decoration>\n    <footer>"
+    },
+    {
+        "name": "target-notes",
+        "class": "docutils.parsers.rst.directives.references.TargetNotes",
+        "args": [],
+        "options": {},
+        "output": "<pending>\n    .. internal attributes:\n         .transform: docutils.transforms.references.TargetNotes\n         .details:"
+    },
+    {
+        "name": "default-role",
+        "class": "sphinx.directives.DefaultRole",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "default-domain",
+        "class": "sphinx.directives.DefaultDomain",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "describe",
+        "class": "sphinx.directives.ObjectDescription",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "object",
+        "class": "sphinx.directives.ObjectDescription",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "highlight",
+        "class": "sphinx.directives.code.Highlight",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "highlightlang",
+        "class": "sphinx.directives.code.HighlightLang",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "code-block",
+        "class": "sphinx.directives.code.CodeBlock",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "sourcecode",
+        "class": "sphinx.directives.code.CodeBlock",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "literalinclude",
+        "class": "sphinx.directives.code.LiteralInclude",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "toctree",
+        "class": "sphinx.directives.other.TocTree",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "sectionauthor",
+        "class": "sphinx.directives.other.Author",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "moduleauthor",
+        "class": "sphinx.directives.other.Author",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "codeauthor",
+        "class": "sphinx.directives.other.Author",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "index",
+        "class": "sphinx.directives.other.Index",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "seealso",
+        "class": "sphinx.directives.other.SeeAlso",
+        "args": [],
+        "options": {},
+        "output": "<seealso>"
+    },
+    {
+        "name": "tabularcolumns",
+        "class": "sphinx.directives.other.TabularColumns",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "centered",
+        "class": "sphinx.directives.other.Centered",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "acks",
+        "class": "sphinx.directives.other.Acks",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "hlist",
+        "class": "sphinx.directives.other.HList",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "only",
+        "class": "sphinx.directives.other.Only",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "include",
+        "class": "sphinx.directives.other.Include",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "figure",
+        "class": "sphinx.directives.patches.Figure",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "meta",
+        "class": "sphinx.directives.patches.Meta",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "table",
+        "class": "sphinx.directives.patches.RSTTable",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "csv-table",
+        "class": "sphinx.directives.patches.CSVTable",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "list-table",
+        "class": "sphinx.directives.patches.ListTable",
+        "args": [],
+        "options": {},
+        "output": ""
+    },
+    {
+        "name": "code",
+        "class": "sphinx.directives.patches.Code",
+        "args": [],
+        "options": {},
+        "output": "<code>"
+    },
+    {
+        "name": "math",
+        "class": "sphinx.directives.patches.MathDirective",
+        "args": [],
+        "options": {},
+        "output": "<math>"
+    },
+    {
+        "name": "deprecated",
+        "class": "sphinx.domains.changeset.VersionChange",
+        "args": [],
+        "options": {},
+        "output": "<deprecated>"
+    },
+    {
+        "name": "versionadded",
+        "class": "sphinx.domains.changeset.VersionChange",
+        "args": [],
+        "options": {},
+        "output": "<versionadded>"
+    },
+    {
+        "name": "versionchanged",
+        "class": "sphinx.domains.changeset.VersionChange",
+        "args": [],
+        "options": {},
+        "output": "<versionchanged>"
+    }
+]

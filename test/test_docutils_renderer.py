@@ -1,4 +1,6 @@
-from textwrap import dedent
+import json
+import os
+from textwrap import dedent, indent
 from unittest import mock
 
 import pytest
@@ -198,3 +200,46 @@ def test_full_run(renderer, file_regression):
 
     renderer.render(Document(string))
     file_regression.check(renderer.document.pformat(), extension=".xml")
+
+
+with open(
+    os.path.join(os.path.dirname(__file__), "samples", "sphinx_directives.json"), "r"
+) as fin:
+    directives = json.load(fin)
+
+
+@pytest.mark.parametrize(
+    "directive",
+    [
+        d
+        for d in directives
+        if d["class"].startswith("docutils") and not d.get("sub_only", False)
+        # todo add substitution definition directive and reference role
+    ],
+)
+def test_docutils_directives(renderer, directive):
+    """See https://docutils.sourceforge.io/docs/ref/rst/directives.html"""
+    # TODO load and test sphinx directives/roles
+    name = directive["name"]
+    if name in ["role", "rst-class", "cssclass", "line-block"]:
+        # TODO fix skips
+        pytest.skip("awaiting fix")
+    arguments = " ".join(directive["args"])
+    renderer.render(
+        tokenize(
+            [
+                "```{{{}}} {}\n".format(name, arguments),
+                directive.get("content", "") + "\n",
+                "```\n",
+            ]
+        )[0]
+    )
+    # print(
+    #     repr(renderer.document.pformat()).replace(" " * 8, "    ").replace('"', '\\"')
+    # )
+    assert renderer.document.pformat() == (
+        directive.get("doc_tag", '<document source="">')
+        + "\n"
+        + indent(directive["output"], "    ")
+        + ("\n" if directive["output"] else "")
+    )

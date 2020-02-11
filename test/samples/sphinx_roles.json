@@ -1,0 +1,572 @@
+[
+    {
+        "name": "abbreviation",
+        "import": "docutils.parsers.rst.roles.GenericRole",
+        "type": "class"
+    },
+    {
+        "name": "acronym",
+        "import": "docutils.parsers.rst.roles.GenericRole",
+        "type": "class"
+    },
+    {
+        "name": "emphasis",
+        "import": "docutils.parsers.rst.roles.GenericRole",
+        "type": "class"
+    },
+    {
+        "name": "literal",
+        "import": "docutils.parsers.rst.roles.GenericRole",
+        "type": "class"
+    },
+    {
+        "name": "strong",
+        "import": "docutils.parsers.rst.roles.GenericRole",
+        "type": "class"
+    },
+    {
+        "name": "subscript",
+        "import": "docutils.parsers.rst.roles.GenericRole",
+        "type": "class"
+    },
+    {
+        "name": "superscript",
+        "import": "docutils.parsers.rst.roles.GenericRole",
+        "type": "class"
+    },
+    {
+        "name": "title-reference",
+        "import": "docutils.parsers.rst.roles.GenericRole",
+        "type": "class"
+    },
+    {
+        "name": "pep-reference",
+        "import": "docutils.parsers.rst.roles.pep_reference_role",
+        "type": "function"
+    },
+    {
+        "name": "rfc-reference",
+        "import": "docutils.parsers.rst.roles.rfc_reference_role",
+        "type": "function"
+    },
+    {
+        "name": "raw",
+        "import": "docutils.parsers.rst.roles.raw_role",
+        "type": "function"
+    },
+    {
+        "name": "code",
+        "import": "docutils.parsers.rst.roles.code_role",
+        "type": "function"
+    },
+    {
+        "name": "math",
+        "import": "docutils.parsers.rst.roles.math_role",
+        "type": "function"
+    },
+    {
+        "name": "named-reference",
+        "import": "docutils.parsers.rst.roles.unimplemented_role",
+        "type": "function"
+    },
+    {
+        "name": "anonymous-reference",
+        "import": "docutils.parsers.rst.roles.unimplemented_role",
+        "type": "function"
+    },
+    {
+        "name": "uri-reference",
+        "import": "docutils.parsers.rst.roles.unimplemented_role",
+        "type": "function"
+    },
+    {
+        "name": "footnote-reference",
+        "import": "docutils.parsers.rst.roles.unimplemented_role",
+        "type": "function"
+    },
+    {
+        "name": "citation-reference",
+        "import": "docutils.parsers.rst.roles.unimplemented_role",
+        "type": "function"
+    },
+    {
+        "name": "substitution-reference",
+        "import": "docutils.parsers.rst.roles.unimplemented_role",
+        "type": "function"
+    },
+    {
+        "name": "target",
+        "import": "docutils.parsers.rst.roles.unimplemented_role",
+        "type": "function"
+    },
+    {
+        "name": "restructuredtext-unimplemented-role",
+        "import": "docutils.parsers.rst.roles.unimplemented_role",
+        "type": "function"
+    },
+    {
+        "name": "command",
+        "import": "docutils.parsers.rst.roles.CustomRole",
+        "type": "class"
+    },
+    {
+        "name": "dfn",
+        "import": "docutils.parsers.rst.roles.CustomRole",
+        "type": "class"
+    },
+    {
+        "name": "kbd",
+        "import": "docutils.parsers.rst.roles.CustomRole",
+        "type": "class"
+    },
+    {
+        "name": "mailheader",
+        "import": "docutils.parsers.rst.roles.CustomRole",
+        "type": "class"
+    },
+    {
+        "name": "makevar",
+        "import": "docutils.parsers.rst.roles.CustomRole",
+        "type": "class"
+    },
+    {
+        "name": "manpage",
+        "import": "docutils.parsers.rst.roles.CustomRole",
+        "type": "class"
+    },
+    {
+        "name": "mimetype",
+        "import": "docutils.parsers.rst.roles.CustomRole",
+        "type": "class"
+    },
+    {
+        "name": "newsgroup",
+        "import": "docutils.parsers.rst.roles.CustomRole",
+        "type": "class"
+    },
+    {
+        "name": "regexp",
+        "import": "docutils.parsers.rst.roles.CustomRole",
+        "type": "class"
+    },
+    {
+        "name": "c:func",
+        "import": "sphinx.domains.c.CXRefRole",
+        "type": "class"
+    },
+    {
+        "name": "c:member",
+        "import": "sphinx.domains.c.CObject",
+        "type": "function"
+    },
+    {
+        "name": "c:macro",
+        "import": "sphinx.domains.c.CObject",
+        "type": "function"
+    },
+    {
+        "name": "c:data",
+        "import": "sphinx.domains.c.CXRefRole",
+        "type": "class"
+    },
+    {
+        "name": "c:type",
+        "import": "sphinx.domains.c.CObject",
+        "type": "function"
+    },
+    {
+        "name": "c:function",
+        "import": "sphinx.domains.c.CObject",
+        "type": "function"
+    },
+    {
+        "name": "c:var",
+        "import": "sphinx.domains.c.CObject",
+        "type": "function"
+    },
+    {
+        "name": "cpp:any",
+        "import": "sphinx.domains.cpp.CPPXRefRole",
+        "type": "class"
+    },
+    {
+        "name": "cpp:class",
+        "import": "sphinx.domains.cpp.CPPClassObject",
+        "type": "function"
+    },
+    {
+        "name": "cpp:struct",
+        "import": "sphinx.domains.cpp.CPPClassObject",
+        "type": "function"
+    },
+    {
+        "name": "cpp:union",
+        "import": "sphinx.domains.cpp.CPPUnionObject",
+        "type": "function"
+    },
+    {
+        "name": "cpp:func",
+        "import": "sphinx.domains.cpp.CPPXRefRole",
+        "type": "class"
+    },
+    {
+        "name": "cpp:member",
+        "import": "sphinx.domains.cpp.CPPMemberObject",
+        "type": "function"
+    },
+    {
+        "name": "cpp:var",
+        "import": "sphinx.domains.cpp.CPPMemberObject",
+        "type": "function"
+    },
+    {
+        "name": "cpp:type",
+        "import": "sphinx.domains.cpp.CPPTypeObject",
+        "type": "function"
+    },
+    {
+        "name": "cpp:concept",
+        "import": "sphinx.domains.cpp.CPPConceptObject",
+        "type": "function"
+    },
+    {
+        "name": "cpp:enum",
+        "import": "sphinx.domains.cpp.CPPEnumObject",
+        "type": "function"
+    },
+    {
+        "name": "cpp:enumerator",
+        "import": "sphinx.domains.cpp.CPPEnumeratorObject",
+        "type": "function"
+    },
+    {
+        "name": "cpp:expr",
+        "import": "sphinx.domains.cpp.CPPExprRole",
+        "type": "class"
+    },
+    {
+        "name": "cpp:texpr",
+        "import": "sphinx.domains.cpp.CPPExprRole",
+        "type": "class"
+    },
+    {
+        "name": "cpp:function",
+        "import": "sphinx.domains.cpp.CPPFunctionObject",
+        "type": "function"
+    },
+    {
+        "name": "cpp:enum-struct",
+        "import": "sphinx.domains.cpp.CPPEnumObject",
+        "type": "function"
+    },
+    {
+        "name": "cpp:enum-class",
+        "import": "sphinx.domains.cpp.CPPEnumObject",
+        "type": "function"
+    },
+    {
+        "name": "cpp:namespace",
+        "import": "sphinx.domains.cpp.CPPNamespaceObject",
+        "type": "function"
+    },
+    {
+        "name": "cpp:namespace-push",
+        "import": "sphinx.domains.cpp.CPPNamespacePushObject",
+        "type": "function"
+    },
+    {
+        "name": "cpp:namespace-pop",
+        "import": "sphinx.domains.cpp.CPPNamespacePopObject",
+        "type": "function"
+    },
+    {
+        "name": "cpp:alias",
+        "import": "sphinx.domains.cpp.CPPAliasObject",
+        "type": "function"
+    },
+    {
+        "name": "js:func",
+        "import": "sphinx.domains.javascript.JSXRefRole",
+        "type": "class"
+    },
+    {
+        "name": "js:meth",
+        "import": "sphinx.domains.javascript.JSXRefRole",
+        "type": "class"
+    },
+    {
+        "name": "js:class",
+        "import": "sphinx.domains.javascript.JSConstructor",
+        "type": "function"
+    },
+    {
+        "name": "js:data",
+        "import": "sphinx.domains.javascript.JSObject",
+        "type": "function"
+    },
+    {
+        "name": "js:attr",
+        "import": "sphinx.domains.javascript.JSXRefRole",
+        "type": "class"
+    },
+    {
+        "name": "js:mod",
+        "import": "sphinx.domains.javascript.JSXRefRole",
+        "type": "class"
+    },
+    {
+        "name": "js:function",
+        "import": "sphinx.domains.javascript.JSCallable",
+        "type": "function"
+    },
+    {
+        "name": "js:method",
+        "import": "sphinx.domains.javascript.JSCallable",
+        "type": "function"
+    },
+    {
+        "name": "js:attribute",
+        "import": "sphinx.domains.javascript.JSObject",
+        "type": "function"
+    },
+    {
+        "name": "js:module",
+        "import": "sphinx.domains.javascript.JSModule",
+        "type": "function"
+    },
+    {
+        "name": "eq",
+        "import": "sphinx.domains.math.MathReferenceRole",
+        "type": "class"
+    },
+    {
+        "name": "math:numref",
+        "import": "sphinx.domains.math.MathReferenceRole",
+        "type": "class"
+    },
+    {
+        "name": "py:data",
+        "import": "sphinx.domains.python.PyVariable",
+        "type": "function"
+    },
+    {
+        "name": "py:exc",
+        "import": "sphinx.domains.python.PyXRefRole",
+        "type": "class"
+    },
+    {
+        "name": "py:func",
+        "import": "sphinx.domains.python.PyXRefRole",
+        "type": "class"
+    },
+    {
+        "name": "py:class",
+        "import": "sphinx.domains.python.PyClasslike",
+        "type": "function"
+    },
+    {
+        "name": "py:const",
+        "import": "sphinx.domains.python.PyXRefRole",
+        "type": "class"
+    },
+    {
+        "name": "py:attr",
+        "import": "sphinx.domains.python.PyXRefRole",
+        "type": "class"
+    },
+    {
+        "name": "py:meth",
+        "import": "sphinx.domains.python.PyXRefRole",
+        "type": "class"
+    },
+    {
+        "name": "py:mod",
+        "import": "sphinx.domains.python.PyXRefRole",
+        "type": "class"
+    },
+    {
+        "name": "py:obj",
+        "import": "sphinx.domains.python.PyXRefRole",
+        "type": "class"
+    },
+    {
+        "name": "py:function",
+        "import": "sphinx.domains.python.PyFunction",
+        "type": "function"
+    },
+    {
+        "name": "py:exception",
+        "import": "sphinx.domains.python.PyClasslike",
+        "type": "function"
+    },
+    {
+        "name": "py:method",
+        "import": "sphinx.domains.python.PyMethod",
+        "type": "function"
+    },
+    {
+        "name": "py:classmethod",
+        "import": "sphinx.domains.python.PyClassMethod",
+        "type": "function"
+    },
+    {
+        "name": "py:staticmethod",
+        "import": "sphinx.domains.python.PyStaticMethod",
+        "type": "function"
+    },
+    {
+        "name": "py:attribute",
+        "import": "sphinx.domains.python.PyAttribute",
+        "type": "function"
+    },
+    {
+        "name": "py:module",
+        "import": "sphinx.domains.python.PyModule",
+        "type": "function"
+    },
+    {
+        "name": "py:currentmodule",
+        "import": "sphinx.domains.python.PyCurrentModule",
+        "type": "function"
+    },
+    {
+        "name": "py:decorator",
+        "import": "sphinx.domains.python.PyDecoratorFunction",
+        "type": "function"
+    },
+    {
+        "name": "py:decoratormethod",
+        "import": "sphinx.domains.python.PyDecoratorMethod",
+        "type": "function"
+    },
+    {
+        "name": "rst:role",
+        "import": "sphinx.domains.rst.ReSTRole",
+        "type": "function"
+    },
+    {
+        "name": "rst:directive",
+        "import": "sphinx.domains.rst.ReSTDirective",
+        "type": "function"
+    },
+    {
+        "name": "rst:directive:option",
+        "import": "sphinx.domains.rst.ReSTDirectiveOption",
+        "type": "function"
+    },
+    {
+        "name": "program",
+        "import": "sphinx.domains.std.Program",
+        "type": "function"
+    },
+    {
+        "name": "option",
+        "import": "sphinx.domains.std.Cmdoption",
+        "type": "function"
+    },
+    {
+        "name": "envvar",
+        "import": "sphinx.domains.std.EnvVar",
+        "type": "function"
+    },
+    {
+        "name": "cmdoption",
+        "import": "sphinx.domains.std.Cmdoption",
+        "type": "function"
+    },
+    {
+        "name": "glossary",
+        "import": "sphinx.domains.std.Glossary",
+        "type": "function"
+    },
+    {
+        "name": "productionlist",
+        "import": "sphinx.domains.std.ProductionList",
+        "type": "function"
+    },
+    {
+        "name": "index",
+        "import": "sphinx.roles.Index",
+        "type": "class"
+    },
+    {
+        "name": "download",
+        "import": "sphinx.roles.XRefRole",
+        "type": "class"
+    },
+    {
+        "name": "any",
+        "import": "sphinx.roles.AnyXRefRole",
+        "type": "class"
+    },
+    {
+        "name": "pep",
+        "import": "sphinx.roles.PEP",
+        "type": "class"
+    },
+    {
+        "name": "rfc",
+        "import": "sphinx.roles.RFC",
+        "type": "class"
+    },
+    {
+        "name": "guilabel",
+        "import": "sphinx.roles.GUILabel",
+        "type": "class"
+    },
+    {
+        "name": "menuselection",
+        "import": "sphinx.roles.MenuSelection",
+        "type": "class"
+    },
+    {
+        "name": "file",
+        "import": "sphinx.roles.EmphasizedLiteral",
+        "type": "class"
+    },
+    {
+        "name": "samp",
+        "import": "sphinx.roles.EmphasizedLiteral",
+        "type": "class"
+    },
+    {
+        "name": "abbr",
+        "import": "sphinx.roles.Abbreviation",
+        "type": "class"
+    },
+    {
+        "name": "rst:dir",
+        "import": "sphinx.roles.XRefRole",
+        "type": "class"
+    },
+    {
+        "name": "token",
+        "import": "sphinx.roles.XRefRole",
+        "type": "class"
+    },
+    {
+        "name": "term",
+        "import": "sphinx.roles.XRefRole",
+        "type": "class"
+    },
+    {
+        "name": "ref",
+        "import": "sphinx.roles.XRefRole",
+        "type": "class"
+    },
+    {
+        "name": "numref",
+        "import": "sphinx.roles.XRefRole",
+        "type": "class"
+    },
+    {
+        "name": "keyword",
+        "import": "sphinx.roles.XRefRole",
+        "type": "class"
+    },
+    {
+        "name": "doc",
+        "import": "sphinx.roles.XRefRole",
+        "type": "class"
+    }
+]

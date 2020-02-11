@@ -23,6 +23,9 @@ class DocutilsRenderer(BaseRenderer):
         self.document = document
         if self.document is None:
             self.document = new_document("", settings=None)
+            # used by raw directive:
+            self.document.settings.raw_enabled = True
+            self.document.settings.file_insertion_enabled = True
         self.current_node = current_node or self.document
         self.language_module = language
         get_language(language)
@@ -37,6 +40,7 @@ class DocutilsRenderer(BaseRenderer):
         # TODO deal with footnotes
         self.footnotes.update(token.footnotes)
         self.render_children(token)
+        return self.document
 
     def render_paragraph(self, token):
         para = nodes.paragraph("")
@@ -272,11 +276,14 @@ class DocutilsRenderer(BaseRenderer):
             self.current_node += messages
             return
 
+        state_machine = MockStateMachine(self, token.range[0])
+
         directive_instance = directive_class(
             name=name,
             # the list of positional arguments
-            arguments=[],
+            arguments=[token.arguments],  # TODO how/when to split multiple arguments?
             # a dictionary mapping option names to values
+            # TODO option parsing
             options={},
             # the directive content line by line
             content=content.splitlines(),
@@ -286,8 +293,8 @@ class DocutilsRenderer(BaseRenderer):
             content_offset=0,
             # a string containing the entire directive
             block_text=content,
-            state=MockState(self, token.range[0]),
-            state_machine=MockStateMachine(self, token.range[0]),
+            state=MockState(self, state_machine, token.range[0]),
+            state_machine=state_machine,
         )
 
         try:
@@ -314,22 +321,42 @@ class DocutilsRenderer(BaseRenderer):
 
 
 class MockState:
-    def __init__(self, renderer, lineno):
+    def __init__(self, renderer, state_machine, lineno):
         self._renderer = renderer
         self._lineno = lineno
         self.document = renderer.document
+        self.state_machine = state_machine
 
-    def nested_parse(self, content, content_offset, root_node):
+    def nested_parse(
+        self,
+        block,
+        input_offset,
+        node,
+        match_titles=False,
+        state_machine_class=None,
+        state_machine_kwargs=None,
+    ):
+        current_match_titles = self.state_machine.match_titles
+        self.state_machine.match_titles = match_titles
         nested_renderer = DocutilsRenderer(
             document=self.document,
             language=self._renderer.language_module,
-            current_node=root_node,
+            current_node=node,
         )
+        self.state_machine.match_titles = current_match_titles
         # TODO deal with starting line number
-        nested_renderer.render(Document(content))
+        nested_renderer.render(Document(block))
 
-    # def inline_text(self, text, lineno):
-    #     return textnodes, messages
+    def inline_text(self, text, lineno):
+        # TODO inline_text
+        messages = []
+        textnodes = []
+        return textnodes, messages
+
+    def block_quote(self, indented, line_offset):
+        # TODO block_quote
+        elements = []
+        return elements
 
 
 class MockStateMachine:
@@ -338,3 +365,10 @@ class MockStateMachine:
         self._lineno = lineno
         self.document = renderer.document
         self.reporter = self.document.reporter
+        self.node = renderer.current_node
+        self.match_titles = True
+
+    def get_source_and_line(self, lineno=None):
+        """Return (source, line) tuple for current or given line number."""
+        # TODO return correct line source
+        return "", lineno or self._lineno
