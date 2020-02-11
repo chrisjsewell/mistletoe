@@ -7,6 +7,8 @@ from sphinx import addnodes
 
 from mistletoe.base_renderer import BaseRenderer
 
+# from mistletoe.span_token import RawText
+
 
 class DocutilsRenderer(BaseRenderer):
     def __init__(self, document=None, extras=()):
@@ -40,6 +42,13 @@ class DocutilsRenderer(BaseRenderer):
     def render_raw_text(self, token):
         self.current_node.append(nodes.Text(token.content, token.content))
 
+    def render_escape_sequence(self, token):
+        text = token.children[0].content
+        self.current_node.append(nodes.Text(text, text))
+
+    def render_line_break(self, token):
+        self.current_node.append(nodes.raw("", "<br />", format="html"))
+
     def render_strong(self, token):
         node = nodes.strong()
         self.current_node.append(node)
@@ -56,12 +65,30 @@ class DocutilsRenderer(BaseRenderer):
         self.render_children(token)
         self.current_node = current_node
 
+    def render_quote(self, token):
+        quote = nodes.block_quote()
+        quote.line = token.range[0]
+        self.current_node.append(quote)
+        current_node = self.current_node
+        self.current_node = quote
+        self.render_children(token)
+        self.current_node = current_node
+
+    def render_strikethrough(self, token):
+        # TODO there is no existing node/role for this
+        raise NotImplementedError
+
     def render_thematic_break(self, token):
         self.current_node.append(nodes.transition())
 
     def render_block_code(self, token):
         text = token.children[0].content
         node = nodes.literal_block(text, text, language=token.language)
+        self.current_node.append(node)
+
+    def render_inline_code(self, token):
+        text = token.children[0].content
+        node = nodes.literal(text, text)
         self.current_node.append(node)
 
     def _is_section_level(self, level, section):
@@ -161,29 +188,55 @@ class DocutilsRenderer(BaseRenderer):
         self.render_children(token)
         self.current_node = current_node
 
+    def render_image(self, token):
+        img_node = nodes.image()
+        img_node["uri"] = token.src
+
+        # TODO how should image alt children be stored?
+        img_node["alt"] = ""
+        # if token.children and isinstance(token.children[0], RawText):
+        #     img_node['alt'] = token.children[0].content
+        #     token.children[0].content = ""
+
+        self.current_node.append(img_node)
+        current_node = self.current_node
+        self.current_node = img_node
+        self.render_children(token)
+        self.current_node = current_node
+
     def render_list(self, token):
-        raise NotImplementedError
+        list_node = None
+        if token.start is not None:
+            list_node = nodes.enumerated_list()
+            # TODO deal with token.start?
+            # TODO support numerals/letters for lists
+            # (see https://stackoverflow.com/a/48372856/5033292)
+            # See docutils/docutils/parsers/rst/states.py:Body.enumerator
+            # list_node['enumtype'] = 'arabic', 'loweralpha', 'upperroman', etc.
+            # list_node['start']
+            # list_node['prefix']
+            # list_node['suffix']
+        else:
+            list_node = nodes.bullet_list()
+        # TODO deal with token.loose?
+        # TODO list range
+        # list_node.line = token.range[0]
+
+        self.current_node.append(list_node)
+        current_node = self.current_node
+        self.current_node = list_node
+        self.render_children(token)
+        self.current_node = current_node
 
     def render_list_item(self, token):
-        raise NotImplementedError
-
-    def render_inline_code(self, token):
-        raise NotImplementedError
-
-    def render_strikethrough(self, token):
-        raise NotImplementedError
-
-    def render_image(self, token):
-        raise NotImplementedError
-
-    def render_auto_link(self, token):
-        raise NotImplementedError
-
-    def render_escape_sequence(self, token):
-        raise NotImplementedError
-
-    def render_quote(self, token):
-        raise NotImplementedError
+        item_node = nodes.list_item()
+        # TODO list item range
+        # node.line = token.range[0]
+        self.current_node.append(item_node)
+        current_node = self.current_node
+        self.current_node = item_node
+        self.render_children(token)
+        self.current_node = current_node
 
     def render_table(self, token):
         raise NotImplementedError
@@ -194,5 +247,5 @@ class DocutilsRenderer(BaseRenderer):
     def render_table_cell(self, token):
         raise NotImplementedError
 
-    def render_line_break(self, token):
+    def render_auto_link(self, token):
         raise NotImplementedError

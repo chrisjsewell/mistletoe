@@ -2,6 +2,9 @@ from textwrap import dedent
 from unittest import mock
 
 import pytest
+
+from mistletoe.block_token import tokenize
+from mistletoe.span_token import tokenize_inner
 from mistletoe.docutils_renderer import DocutilsRenderer
 
 
@@ -53,6 +56,17 @@ def test_raw_text(renderer):
     )
 
 
+def test_inline_code(renderer):
+    renderer.render(tokenize_inner("`foo`")[0])
+    assert renderer.document.pformat() == dedent(
+        """\
+    <document source="">
+        <literal>
+            foo
+    """
+    )
+
+
 def test_paragraph(renderer):
     render_token(renderer, "Paragraph", range=(0, 1))
     assert renderer.document.pformat() == dedent(
@@ -75,7 +89,6 @@ def test_heading(renderer):
 
 
 def test_block_code(renderer):
-    from mistletoe.block_token import tokenize
 
     renderer.render(tokenize(["```sh\n", "foo\n", "```\n"])[0])
     assert renderer.document.pformat() == dedent(
@@ -88,7 +101,6 @@ def test_block_code(renderer):
 
 
 def test_block_code_no_language(renderer):
-    from mistletoe.block_token import tokenize
 
     renderer.render(tokenize(["```\n", "foo\n", "```\n"])[0])
     assert renderer.document.pformat() == dedent(
@@ -96,5 +108,55 @@ def test_block_code_no_language(renderer):
     <document source="">
         <literal_block language="" xml:space="preserve">
             foo
+    """
+    )
+
+
+def test_image(renderer):
+    render_token(renderer, "Image", src="src", title="title")
+    assert renderer.document.pformat() == dedent(
+        """\
+    <document source="">
+        <image alt="" uri="src">
+    """
+    )
+
+
+def test_quote(renderer):
+    render_token(renderer, "Quote", range=(0, 0))
+    assert renderer.document.pformat() == dedent(
+        """\
+    <document source="">
+        <block_quote>
+    """
+    )
+
+
+def test_bullet_list(renderer):
+    render_token(renderer, "List", start=None)
+    assert renderer.document.pformat() == dedent(
+        """\
+    <document source="">
+        <bullet_list>
+    """
+    )
+
+
+def test_enumerated_list(renderer):
+    render_token(renderer, "List", start=1)
+    assert renderer.document.pformat() == dedent(
+        """\
+    <document source="">
+        <enumerated_list>
+    """
+    )
+
+
+def test_list_item(renderer):
+    render_token(renderer, "ListItem")
+    assert renderer.document.pformat() == dedent(
+        """\
+    <document source="">
+        <list_item>
     """
     )
