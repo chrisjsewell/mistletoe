@@ -15,7 +15,7 @@ class DocutilsRenderer(BaseRenderer):
             extras (list): allows subclasses to add even more custom tokens.
         """
         self.document = document
-        if self.document is None:     
+        if self.document is None:
             self.document = new_document("", settings=None)
         self.current_node = self.document
         self._level_to_elem = {0: self.document}
@@ -61,7 +61,7 @@ class DocutilsRenderer(BaseRenderer):
 
     def render_block_code(self, token):
         text = token.children[0].content
-        node = nodes.literal_block(text, text, language=token.language, options=token.options)
+        node = nodes.literal_block(text, text, language=token.language)
         self.current_node.append(node)
 
     def _is_section_level(self, level, section):
@@ -69,7 +69,8 @@ class DocutilsRenderer(BaseRenderer):
 
     def _add_section(self, section, level):
         parent_level = max(
-            section_level for section_level in self._level_to_elem
+            section_level
+            for section_level in self._level_to_elem
             if level > section_level
         )
         parent = self._level_to_elem[parent_level]
@@ -98,7 +99,6 @@ class DocutilsRenderer(BaseRenderer):
 
         self._add_section(new_section, token.level)
 
-        current_node = self.current_node
         self.current_node = title_node
         self.render_children(token)
 
@@ -108,7 +108,7 @@ class DocutilsRenderer(BaseRenderer):
         #     text = self.translate_section_name(text)
         name = nodes.fully_normalize_name(text)
         section = self.current_node.parent
-        section['names'].append(name)
+        section["names"].append(name)
         self.document.note_implicit_target(section, section)
         self.current_node = section
 
@@ -124,10 +124,10 @@ class DocutilsRenderer(BaseRenderer):
 
         # if ext.replace('.', '') in self.supported:
         #     destination = destination.replace(ext, '')
-        ref_node['refuri'] = destination
+        ref_node["refuri"] = destination
         # ref_node.line = self._get_line(token)
         if token.title:
-            ref_node['title'] = token.title
+            ref_node["title"] = token.title
         next_node = ref_node
 
         url_check = urlparse(destination)
@@ -143,15 +143,15 @@ class DocutilsRenderer(BaseRenderer):
         if not url_check.fragment and not scheme_known:
             wrap_node = addnodes.pending_xref(
                 reftarget=unquote(destination),
-                reftype='any',
+                reftype="any",
                 refdomain=None,  # Added to enable cross-linking
                 refexplicit=True,
-                refwarn=True
+                refwarn=True,
             )
             # TODO also not correct sourcepos
             # wrap_node.line = self._get_line(token)
             if token.title:
-                wrap_node['title'] = token.title
+                wrap_node["title"] = token.title
             wrap_node.append(ref_node)
             next_node = wrap_node
 
@@ -196,5 +196,3 @@ class DocutilsRenderer(BaseRenderer):
 
     def render_line_break(self, token):
         raise NotImplementedError
-
-

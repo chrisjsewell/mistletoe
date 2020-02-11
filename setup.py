@@ -30,6 +30,7 @@ setup(
     extras_require={
         "code_style": ["flake8<3.8.0,>=3.7.0", "black", "pre-commit==1.17.0"],
         "testing": ["coverage", "pytest>=3.6,<4", "pytest-cov"],
+        "sphinx": ["docutils>=0.15,<0.2", "sphinx>=2,<3"],
     },
     zip_safe=False,
 )

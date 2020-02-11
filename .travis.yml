@@ -10,7 +10,7 @@ matrix:
       sudo: true
 install:
   - pip install --upgrade pip wheel setuptools
-  - pip install -e .[testing]
+  - pip install -e .[sphinx,testing]
 before_script:
     - (cd test/commonmark && ./spec.sh)
 script:
