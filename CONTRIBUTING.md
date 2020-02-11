@@ -96,6 +96,29 @@ Apart from that, stay consistent with the coding style around you. But don't
 get boggled down by this: if you have a genius idea, I'd love to clean up
 for you; write down your genius idea first.
 
+It is recommended that code style is checked using [flake8](http://flake8.pycqa.org),
+with the configuration set in `.flake8`,
+and code formatted with [black](https://github.com/ambv/black).
+
+Installing with `mistletoe[code_style]` makes the [pre-commit](https://pre-commit.com/)
+package available, which will ensure this style is met before commits are submitted, by reformatting the code
+and testing for lint errors.
+It can be setup by:
+
+```shell
+>> cd mistletoe
+>> pre-commit install
+```
+
+Optionally you can run `black` and `flake8` separately:
+
+```shell
+>> black .
+>> flake8 .
+```
+
+Editors like VS Code also have automatic code reformat utilities, which can adhere to this standard.
+
 ## Get in touch
 
 I tweet [@mi_before_yu][twitter]. Also yell at me over [email][email].
