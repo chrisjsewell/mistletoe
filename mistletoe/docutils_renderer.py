@@ -1,3 +1,4 @@
+from itertools import chain
 from os.path import splitext
 from urllib.parse import urlparse, unquote
 
@@ -21,13 +22,15 @@ class DocutilsRenderer(BaseRenderer):
             self.document = new_document("", settings=None)
         self.current_node = self.document
         self._level_to_elem = {0: self.document}
-        super().__init__(*extras)
+        super().__init__(*chain((), extras))
 
     def render_children(self, token):
         for child in token.children:
             self.render(child)
 
     def render_document(self, token):
+        # TODO deal with footnotes
+        self.footnotes.update(token.footnotes)
         self.render_children(token)
 
     def render_paragraph(self, token):

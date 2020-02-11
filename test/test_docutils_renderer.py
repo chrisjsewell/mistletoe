@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 
+from mistletoe import Document
 from mistletoe.block_token import tokenize
 from mistletoe.span_token import tokenize_inner
 from mistletoe.docutils_renderer import DocutilsRenderer
@@ -160,3 +161,40 @@ def test_list_item(renderer):
         <list_item>
     """
     )
+
+
+def test_full_run(renderer, file_regression):
+    string = dedent(
+        """\
+        # header 1
+        ## sub header 1
+
+        a *b* **c** `abc` \\*
+
+        ## sub header 2
+
+        x y [a](http://www.xyz.com) z
+
+        ---
+
+        # header 2
+
+        ```::python {a=1}
+        a = 1
+        ```
+
+        > abc
+
+        - a
+        - b
+            - c
+
+        1. a
+        2. b
+            1. c
+
+        """
+    )
+
+    renderer.render(Document(string))
+    file_regression.check(renderer.document.pformat())
