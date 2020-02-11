@@ -6,22 +6,22 @@
             <title>
                 sub header 1
             <paragraph>
-                a
+                a 
                 <emphasis>
                     b
-
+                 
                 <strong>
                     c
-
+                 
                 <literal>
                     abc
-
+                 
                 *
         <section ids="sub-header-2" names="sub\ header\ 2">
             <title>
                 sub header 2
             <paragraph>
-                x y
+                x y 
                 <reference refuri="http://www.xyz.com">
                     a
                  z

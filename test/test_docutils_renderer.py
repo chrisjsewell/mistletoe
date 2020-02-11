@@ -197,4 +197,4 @@ def test_full_run(renderer, file_regression):
     )
 
     renderer.render(Document(string))
-    file_regression.check(renderer.document.pformat())
+    file_regression.check(renderer.document.pformat(), extension=".xml")
