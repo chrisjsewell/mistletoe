@@ -1,5 +1,6 @@
 from itertools import chain
 from os.path import splitext
+import re
 from urllib.parse import urlparse, unquote
 
 from docutils import nodes
@@ -7,6 +8,7 @@ from docutils.languages import get_language
 from docutils.parsers.rst import directives, DirectiveError
 from docutils.utils import new_document
 from sphinx import addnodes
+import yaml
 
 from mistletoe import Document
 from mistletoe.base_renderer import BaseRenderer
@@ -28,6 +30,7 @@ class DocutilsRenderer(BaseRenderer):
             self.document.settings.file_insertion_enabled = True
         self.current_node = current_node or self.document
         self.language_module = language
+        self._directive_regex = re.compile(r"^\{.*\}\+?$")
         get_language(language)
         self._level_to_elem = {0: self.document}
         super().__init__(*chain((), extras))
@@ -94,7 +97,7 @@ class DocutilsRenderer(BaseRenderer):
         self.current_node.append(nodes.transition())
 
     def render_block_code(self, token):
-        if token.language.startswith("{") and token.language.endswith("}"):
+        if self._directive_regex.match(token.language):
             return self.render_directive(token)
         text = token.children[0].content
         node = nodes.literal_block(text, text, language=token.language)
@@ -266,8 +269,26 @@ class DocutilsRenderer(BaseRenderer):
 
     def render_directive(self, token):
         name = token.language[1:-1]
-        # TODO directive name white/black lists
         content = token.children[0].content
+        options = {}
+        if name.endswith("}"):
+            name = name[:-1]
+            # get YAML options
+            match = re.search(r"^-{3,}", content, re.MULTILINE)
+            if match:
+                yaml_block = content[: match.start()]
+                content = content[match.end() :]  # TODO advance line number
+            else:
+                yaml_block = content
+                content = ""
+            try:
+                options = yaml.safe_load(yaml_block) or {}
+            except yaml.parser.ParserError:
+                # TODO handle/report yaml parse error
+                pass
+            # TODO check options are an un-nested dict?
+
+        # TODO directive name white/black lists
         directive_class, messages = directives.directive(
             name, self.language_module, self.document
         )
@@ -284,7 +305,7 @@ class DocutilsRenderer(BaseRenderer):
             arguments=[token.arguments],  # TODO how/when to split multiple arguments?
             # a dictionary mapping option names to values
             # TODO option parsing
-            options={},
+            options=options,
             # the directive content line by line
             content=content.splitlines(),
             # the absolute line number of the first line of the directive
