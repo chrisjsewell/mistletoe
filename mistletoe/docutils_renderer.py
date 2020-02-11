@@ -3,16 +3,19 @@ from os.path import splitext
 from urllib.parse import urlparse, unquote
 
 from docutils import nodes
+from docutils.languages import get_language
+from docutils.parsers.rst import directives, DirectiveError
 from docutils.utils import new_document
 from sphinx import addnodes
 
+from mistletoe import Document
 from mistletoe.base_renderer import BaseRenderer
 
-# from mistletoe.span_token import RawText
+# from mistletoe import block_token, span_token
 
 
 class DocutilsRenderer(BaseRenderer):
-    def __init__(self, document=None, extras=()):
+    def __init__(self, extras=(), document=None, language="en", current_node=None):
         """
         Args:
             extras (list): allows subclasses to add even more custom tokens.
@@ -20,7 +23,9 @@ class DocutilsRenderer(BaseRenderer):
         self.document = document
         if self.document is None:
             self.document = new_document("", settings=None)
-        self.current_node = self.document
+        self.current_node = current_node or self.document
+        self.language_module = language
+        get_language(language)
         self._level_to_elem = {0: self.document}
         super().__init__(*chain((), extras))
 
@@ -85,6 +90,8 @@ class DocutilsRenderer(BaseRenderer):
         self.current_node.append(nodes.transition())
 
     def render_block_code(self, token):
+        if token.language.startswith("{") and token.language.endswith("}"):
+            return self.render_directive(token)
         text = token.children[0].content
         node = nodes.literal_block(text, text, language=token.language)
         self.current_node.append(node)
@@ -197,8 +204,8 @@ class DocutilsRenderer(BaseRenderer):
 
         # TODO how should image alt children be stored?
         img_node["alt"] = ""
-        # if token.children and isinstance(token.children[0], RawText):
-        #     img_node['alt'] = token.children[0].content
+        # if token.children and isinstance(token.children[0], block_token.RawText):
+        #     img_node["alt"] = token.children[0].content
         #     token.children[0].content = ""
 
         self.current_node.append(img_node)
@@ -252,3 +259,80 @@ class DocutilsRenderer(BaseRenderer):
 
     def render_auto_link(self, token):
         raise NotImplementedError
+
+    def render_directive(self, token):
+        name = token.language[1:-1]
+        # TODO directive name white/black lists
+        content = token.children[0].content
+        directive_class, messages = directives.directive(
+            name, self.language_module, self.document
+        )
+        if not directive_class:
+            # TODO deal with unknown directive
+            self.current_node += messages
+            return
+
+        directive_instance = directive_class(
+            name=name,
+            # the list of positional arguments
+            arguments=[],
+            # a dictionary mapping option names to values
+            options={},
+            # the directive content line by line
+            content=content.splitlines(),
+            # the absolute line number of the first line of the directive
+            lineno=token.range[0],
+            # the line offset of the first line of the content
+            content_offset=0,
+            # a string containing the entire directive
+            block_text=content,
+            state=MockState(self, token.range[0]),
+            state_machine=MockStateMachine(self, token.range[0]),
+        )
+
+        try:
+            result = directive_instance.run()
+        except DirectiveError as error:
+            msg_node = self.document.reporter.system_message(
+                error.level, error.msg, line=token.range[0]
+            )
+            msg_node += nodes.literal_block(content, content)
+            result = [msg_node]
+        except AttributeError:
+            # TODO deal with directives that call unimplemented methods of State/Machine
+            raise
+        assert isinstance(
+            result, list
+        ), f'Directive "{name}" must return a list of nodes.'
+        for i in range(len(result)):
+            assert isinstance(
+                result[i], nodes.Node
+            ), f'Directive "{name}" returned non-Node object (index {i}): {result[i]}'
+        self.current_node += result
+
+
+class MockState:
+    def __init__(self, renderer, lineno):
+        self._renderer = renderer
+        self._lineno = lineno
+        self.document = renderer.document
+
+    def nested_parse(self, content, content_offset, root_node):
+        nested_renderer = DocutilsRenderer(
+            document=self.document,
+            language=self._renderer.language_module,
+            current_node=root_node,
+        )
+        # TODO deal with starting line number
+        nested_renderer.render(Document(content))
+
+    # def inline_text(self, text, lineno):
+    #     return textnodes, messages
+
+
+class MockStateMachine:
+    def __init__(self, renderer, lineno):
+        self._renderer = renderer
+        self._lineno = lineno
+        self.document = renderer.document
+        self.reporter = self.document.reporter
