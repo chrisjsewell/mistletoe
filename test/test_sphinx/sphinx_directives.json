@@ -427,7 +427,7 @@
         "args": [],
         "options": {},
         "content": "| a | b |\n|---|---|\n| 1 | 2 |",
-        "output": ""
+        "output": "<table classes=\"colwidths-auto\">\n    <tgroup cols=\"2\">\n        <colspec colwidth=\"50.0\">\n        <colspec colwidth=\"50.0\">\n        <thead>\n            <row>\n                <entry>\n                    a\n                <entry>\n                    b\n        <tbody>\n            <row>\n                <entry>\n                    1\n                <entry>\n                    2"
     },
     {
         "name": "csv-table",

@@ -403,7 +403,7 @@ def test_docutils_directives(renderer, directive):
 def test_sphinx_directives(sphinx_renderer, directive):
     """See https://docutils.sourceforge.io/docs/ref/rst/directives.html"""
     name = directive["name"]
-    if name in ["csv-table", "table", "meta", "include"]:
+    if name in ["csv-table", "meta", "include"]:
         # TODO fix skips
         pytest.skip("awaiting fix")
     arguments = " ".join(directive["args"])

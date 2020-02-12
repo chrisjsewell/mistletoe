@@ -492,14 +492,51 @@ class DocutilsRenderer(BaseRenderer):
         self.current_node = current_node
 
     def render_table(self, token):
-        # TODO render_table
-        raise NotImplementedError
+        table = nodes.table()
+        table["classes"] += ["colwidths-auto"]
+        # TODO column alignment
+        maxcols = max(len(c.children) for c in token.children)
+        # TODO are colwidths actually required
+        colwidths = [100 / maxcols] * maxcols
+        tgroup = nodes.tgroup(cols=len(colwidths))
+        table += tgroup
+        for colwidth in colwidths:
+            colspec = nodes.colspec(colwidth=colwidth)
+            tgroup += colspec
+
+        if hasattr(token, "header"):
+            thead = nodes.thead()
+            tgroup += thead
+            current_node = self.current_node
+            self.current_node = thead
+            self.render_table_row(token.header)
+            self.current_node = current_node
+
+        tbody = nodes.tbody()
+        tgroup += tbody
+
+        current_node = self.current_node
+        self.current_node = tbody
+        self.render_children(token)
+        self.current_node = current_node
+
+        self.current_node.append(table)
 
     def render_table_row(self, token):
-        raise NotImplementedError
+        row = nodes.row()
+        self.current_node.append(row)
+        current_node = self.current_node
+        self.current_node = row
+        self.render_children(token)
+        self.current_node = current_node
 
     def render_table_cell(self, token):
-        raise NotImplementedError
+        entry = nodes.entry()
+        self.current_node.append(entry)
+        current_node = self.current_node
+        self.current_node = entry
+        self.render_children(token)
+        self.current_node = current_node
 
     def render_auto_link(self, token):
         # TODO render_auto_link

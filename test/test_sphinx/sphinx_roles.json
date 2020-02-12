@@ -686,6 +686,7 @@
         "name": "doc",
         "import": "sphinx.roles.XRefRole",
         "type": "class",
-        "output": "<paragraph>\n    <pending_xref refdoc=\"mock_docname\" refdomain=\"std\" refexplicit=\"False\" reftarget=\"a\" reftype=\"doc\" refwarn=\"True\">\n        <inline classes=\"xref std std-doc\">\n            a"
+        "content": "this lecture <heavy_tails>",
+        "output": "<paragraph>\n    <pending_xref refdoc=\"mock_docname\" refdomain=\"std\" refexplicit=\"True\" reftarget=\"heavy_tails\" reftype=\"doc\" refwarn=\"True\">\n        <inline classes=\"xref std std-doc\">\n            this lecture"
     }
 ]
