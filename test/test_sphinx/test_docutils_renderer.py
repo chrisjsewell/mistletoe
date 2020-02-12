@@ -14,13 +14,30 @@ from mistletoe.docutils_renderer import DocutilsRenderer
 @pytest.fixture
 def renderer():
     renderer = DocutilsRenderer()
+    with renderer:
+        yield renderer
+
+
+@pytest.fixture
+def renderer_mock():
+    renderer = DocutilsRenderer()
     renderer.render_inner = mock.Mock(return_value="inner")
     with renderer:
         yield renderer
 
 
-def render_token(renderer, token_name, children=True, without_attrs=None, **kwargs):
-    render_func = renderer.render_map[token_name]
+@pytest.fixture
+def sphinx_env():
+    from sphinx.util.docutils import docutils_namespace
+
+    with docutils_namespace():
+        yield
+
+
+def render_token(
+    renderer_mock, token_name, children=True, without_attrs=None, **kwargs
+):
+    render_func = renderer_mock.render_map[token_name]
     children = mock.MagicMock(spec=list) if children else None
     mock_token = mock.Mock(children=children, **kwargs)
     without_attrs = without_attrs or []
@@ -29,9 +46,9 @@ def render_token(renderer, token_name, children=True, without_attrs=None, **kwar
     render_func(mock_token)
 
 
-def test_strong(renderer):
-    render_token(renderer, "Strong")
-    assert renderer.document.pformat() == dedent(
+def test_strong(renderer_mock):
+    render_token(renderer_mock, "Strong")
+    assert renderer_mock.document.pformat() == dedent(
         """\
     <document source="">
         <strong>
@@ -39,9 +56,9 @@ def test_strong(renderer):
     )
 
 
-def test_emphasis(renderer):
-    render_token(renderer, "Emphasis")
-    assert renderer.document.pformat() == dedent(
+def test_emphasis(renderer_mock):
+    render_token(renderer_mock, "Emphasis")
+    assert renderer_mock.document.pformat() == dedent(
         """\
     <document source="">
         <emphasis>
@@ -49,9 +66,9 @@ def test_emphasis(renderer):
     )
 
 
-def test_raw_text(renderer):
-    render_token(renderer, "RawText", children=False, content="john & jane")
-    assert renderer.document.pformat() == dedent(
+def test_raw_text(renderer_mock):
+    render_token(renderer_mock, "RawText", children=False, content="john & jane")
+    assert renderer_mock.document.pformat() == dedent(
         """\
     <document source="">
         john & jane
@@ -59,9 +76,9 @@ def test_raw_text(renderer):
     )
 
 
-def test_inline_code(renderer):
-    renderer.render(tokenize_inner("`foo`")[0])
-    assert renderer.document.pformat() == dedent(
+def test_inline_code(renderer_mock):
+    renderer_mock.render(tokenize_inner("`foo`")[0])
+    assert renderer_mock.document.pformat() == dedent(
         """\
     <document source="">
         <literal>
@@ -70,9 +87,9 @@ def test_inline_code(renderer):
     )
 
 
-def test_paragraph(renderer):
-    render_token(renderer, "Paragraph", range=(0, 1))
-    assert renderer.document.pformat() == dedent(
+def test_paragraph(renderer_mock):
+    render_token(renderer_mock, "Paragraph", range=(0, 1))
+    assert renderer_mock.document.pformat() == dedent(
         """\
     <document source="">
         <paragraph>
@@ -80,9 +97,9 @@ def test_paragraph(renderer):
     )
 
 
-def test_heading(renderer):
-    render_token(renderer, "Heading", level=1, range=(0, 0))
-    assert renderer.document.pformat() == dedent(
+def test_heading(renderer_mock):
+    render_token(renderer_mock, "Heading", level=1, range=(0, 0))
+    assert renderer_mock.document.pformat() == dedent(
         """\
     <document source="">
         <section ids="id1" names="">
@@ -91,10 +108,9 @@ def test_heading(renderer):
     )
 
 
-def test_block_code(renderer):
-
-    renderer.render(tokenize(["```sh\n", "foo\n", "```\n"])[0])
-    assert renderer.document.pformat() == dedent(
+def test_block_code(renderer_mock):
+    renderer_mock.render(tokenize(["```sh\n", "foo\n", "```\n"])[0])
+    assert renderer_mock.document.pformat() == dedent(
         """\
     <document source="">
         <literal_block language="sh" xml:space="preserve">
@@ -103,10 +119,10 @@ def test_block_code(renderer):
     )
 
 
-def test_block_code_no_language(renderer):
+def test_block_code_no_language(renderer_mock):
 
-    renderer.render(tokenize(["```\n", "foo\n", "```\n"])[0])
-    assert renderer.document.pformat() == dedent(
+    renderer_mock.render(tokenize(["```\n", "foo\n", "```\n"])[0])
+    assert renderer_mock.document.pformat() == dedent(
         """\
     <document source="">
         <literal_block language="" xml:space="preserve">
@@ -115,9 +131,9 @@ def test_block_code_no_language(renderer):
     )
 
 
-def test_image(renderer):
-    render_token(renderer, "Image", src="src", title="title")
-    assert renderer.document.pformat() == dedent(
+def test_image(renderer_mock):
+    render_token(renderer_mock, "Image", src="src", title="title")
+    assert renderer_mock.document.pformat() == dedent(
         """\
     <document source="">
         <image alt="" uri="src">
@@ -125,9 +141,9 @@ def test_image(renderer):
     )
 
 
-def test_quote(renderer):
-    render_token(renderer, "Quote", range=(0, 0))
-    assert renderer.document.pformat() == dedent(
+def test_quote(renderer_mock):
+    render_token(renderer_mock, "Quote", range=(0, 0))
+    assert renderer_mock.document.pformat() == dedent(
         """\
     <document source="">
         <block_quote>
@@ -135,9 +151,9 @@ def test_quote(renderer):
     )
 
 
-def test_bullet_list(renderer):
-    render_token(renderer, "List", start=None)
-    assert renderer.document.pformat() == dedent(
+def test_bullet_list(renderer_mock):
+    render_token(renderer_mock, "List", start=None)
+    assert renderer_mock.document.pformat() == dedent(
         """\
     <document source="">
         <bullet_list>
@@ -145,9 +161,9 @@ def test_bullet_list(renderer):
     )
 
 
-def test_enumerated_list(renderer):
-    render_token(renderer, "List", start=1)
-    assert renderer.document.pformat() == dedent(
+def test_enumerated_list(renderer_mock):
+    render_token(renderer_mock, "List", start=1)
+    assert renderer_mock.document.pformat() == dedent(
         """\
     <document source="">
         <enumerated_list>
@@ -155,9 +171,9 @@ def test_enumerated_list(renderer):
     )
 
 
-def test_list_item(renderer):
-    render_token(renderer, "ListItem")
-    assert renderer.document.pformat() == dedent(
+def test_list_item(renderer_mock):
+    render_token(renderer_mock, "ListItem")
+    assert renderer_mock.document.pformat() == dedent(
         """\
     <document source="">
         <list_item>
@@ -165,9 +181,9 @@ def test_list_item(renderer):
     )
 
 
-def test_math(renderer):
-    render_token(renderer, "Math", content="$a$")
-    assert renderer.document.pformat() == dedent(
+def test_math(renderer_mock):
+    render_token(renderer_mock, "Math", content="$a$")
+    assert renderer_mock.document.pformat() == dedent(
         """\
     <document source="">
         <math>
@@ -176,9 +192,9 @@ def test_math(renderer):
     )
 
 
-def test_math_block(renderer):
-    render_token(renderer, "Math", content="$$a$$")
-    assert renderer.document.pformat() == dedent(
+def test_math_block(renderer_mock):
+    render_token(renderer_mock, "Math", content="$$a$$")
+    assert renderer_mock.document.pformat() == dedent(
         """\
     <document source="">
         <math_block nowrap="False" number="True" xml:space="preserve">
@@ -187,9 +203,9 @@ def test_math_block(renderer):
     )
 
 
-def test_role_code(renderer):
-    renderer.render(tokenize_inner("{code}`` a=1{`} ``")[0])
-    assert renderer.document.pformat() == dedent(
+def test_role_code(renderer_mock):
+    renderer_mock.render(tokenize_inner("{code}`` a=1{`} ``")[0])
+    assert renderer_mock.document.pformat() == dedent(
         """\
     <document source="">
         <literal classes="code">
@@ -252,12 +268,48 @@ with open(
 )
 def test_docutils_directives(renderer, directive):
     """See https://docutils.sourceforge.io/docs/ref/rst/directives.html"""
-    # TODO load and test sphinx directives/roles
+    # TODO load and test roles
     name = directive["name"]
     if name in ["role", "rst-class", "cssclass", "line-block"]:
         # TODO fix skips
         pytest.skip("awaiting fix")
     arguments = " ".join(directive["args"])
+    renderer.render(
+        tokenize(
+            [
+                "```{{{}}} {}\n".format(name, arguments),
+                directive.get("content", "") + "\n",
+                "```\n",
+            ]
+        )[0]
+    )
+    print(
+        repr(renderer.document.pformat()).replace(" " * 8, "    ").replace('"', '\\"')
+    )
+    assert renderer.document.pformat() == (
+        directive.get("doc_tag", '<document source="">')
+        + "\n"
+        + indent(directive["output"], "    ")
+        + ("\n" if directive["output"] else "")
+    )
+
+
+@pytest.mark.parametrize(
+    "directive",
+    [
+        d
+        for d in directives
+        if d["class"].startswith("sphinx") and not d.get("sub_only", False)
+    ],
+)
+def test_sphinx_directives(sphinx_env, renderer, directive):
+    """See https://docutils.sourceforge.io/docs/ref/rst/directives.html"""
+    name = directive["name"]
+    if name in ["literalinclude", "csv-table", "table", "meta", "include", "only"]:
+        # TODO fix skips
+        pytest.skip("awaiting fix")
+    arguments = " ".join(directive["args"])
+    renderer.mock_sphinx_env()
     renderer.render(
         tokenize(
             [

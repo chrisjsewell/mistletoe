@@ -188,6 +188,7 @@ class MystParser(parsers.Parser):
 
 # TODO add FieldList block token, see:
 # https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#field-lists
+# TODO block comments (preferably not just HTML)
 
 
 class Role(span_token.SpanToken):
@@ -226,13 +227,14 @@ class DocutilsRenderer(BaseRenderer):
         self._level_to_elem = {0: self.document}
         super().__init__(*chain((Math, Role), extras))
 
-    @staticmethod
-    def load_sphinx_components():
+    def mock_sphinx_env(self):
         """Load sphinx roles, directives, etc."""
-        from sphinx.registry import SphinxComponentRegistry
         from sphinx.application import builtin_extensions, Sphinx
         from sphinx.config import Config
+        from sphinx.environment import BuildEnvironment
         from sphinx.events import EventManager
+        from sphinx.project import Project
+        from sphinx.registry import SphinxComponentRegistry
 
         class MockSphinx(Sphinx):
             def __init__(self):
@@ -243,8 +245,18 @@ class DocutilsRenderer(BaseRenderer):
                 self.extensions = {}
                 for extension in builtin_extensions:
                     self.registry.load_extension(self, extension)
+                # fresh env
+                self.doctreedir = ""
+                self.srcdir = ""
+                self.project = Project(srcdir="", source_suffix=".md")
+                self.project.docnames = ["mock_docname"]
+                self.env = BuildEnvironment()
+                self.env.setup(self)
+                self.env.temp_data["docname"] = "mock_docname"
 
-        return MockSphinx()
+        app = MockSphinx()
+        self.document.settings.env = app.env
+        return app
 
     def render_children(self, token):
         for child in token.children:

@@ -37,6 +37,7 @@ Stores a reference to the current document token.
 When parsing, footnote entries will be stored in the document by
 accessing this pointer.
 """
+# TODO make thread safe
 _root_node = None
 
 

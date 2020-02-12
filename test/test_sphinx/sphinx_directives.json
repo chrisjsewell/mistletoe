@@ -193,7 +193,7 @@
     {
         "name": "role",
         "class": "docutils.parsers.rst.directives.misc.Role",
-        "args": ["myrole"],
+        "args": [],
         "content": "",
         "options": {},
         "output": ""
@@ -266,56 +266,57 @@
     {
         "name": "default-domain",
         "class": "sphinx.directives.DefaultDomain",
-        "args": [],
+        "args": ["mydomain"],
         "options": {},
         "output": ""
     },
     {
         "name": "describe",
         "class": "sphinx.directives.ObjectDescription",
-        "args": [],
+        "args": ["something"],
         "options": {},
-        "output": ""
+        "output": "<index entries=\"\">\n<desc desctype=\"describe\" domain=\"\" noindex=\"False\" objtype=\"describe\">\n    <desc_signature first=\"False\">\n        <desc_name xml:space=\"preserve\">\n            something\n    <desc_content>"
     },
     {
         "name": "object",
         "class": "sphinx.directives.ObjectDescription",
-        "args": [],
+        "args": ["something"],
         "options": {},
-        "output": ""
+        "output": "<index entries=\"\">\n<desc desctype=\"object\" domain=\"\" noindex=\"False\" objtype=\"object\">\n    <desc_signature first=\"False\">\n        <desc_name xml:space=\"preserve\">\n            something\n    <desc_content>"
     },
     {
         "name": "highlight",
         "class": "sphinx.directives.code.Highlight",
-        "args": [],
+        "args": ["something"],
         "options": {},
-        "output": ""
+        "output": "<highlightlang force=\"False\" lang=\"something\" linenothreshold=\"9223372036854775807\">"
     },
     {
         "name": "highlightlang",
         "class": "sphinx.directives.code.HighlightLang",
-        "args": [],
+        "args": ["something"],
         "options": {},
-        "output": ""
+        "output": "<highlightlang force=\"False\" lang=\"something\" linenothreshold=\"9223372036854775807\">"
     },
     {
         "name": "code-block",
         "class": "sphinx.directives.code.CodeBlock",
         "args": [],
         "options": {},
-        "output": ""
+        "content": "a=1",
+        "output": "<literal_block force=\"False\" highlight_args=\"{}\" language=\"default\" xml:space=\"preserve\">\n    a=1"
     },
     {
         "name": "sourcecode",
         "class": "sphinx.directives.code.CodeBlock",
         "args": [],
         "options": {},
-        "output": ""
+        "output": "<literal_block force=\"False\" highlight_args=\"{}\" language=\"default\" xml:space=\"preserve\">"
     },
     {
         "name": "literalinclude",
         "class": "sphinx.directives.code.LiteralInclude",
-        "args": [],
+        "args": ["path/to/file"],
         "options": {},
         "output": ""
     },
@@ -324,35 +325,35 @@
         "class": "sphinx.directives.other.TocTree",
         "args": [],
         "options": {},
-        "output": ""
+        "output": "<compound classes=\"toctree-wrapper\">\n    <toctree caption=\"True\" entries=\"\" glob=\"False\" hidden=\"False\" includefiles=\"\" includehidden=\"False\" maxdepth=\"-1\" numbered=\"0\" parent=\"mock_docname\" titlesonly=\"False\">"
     },
     {
         "name": "sectionauthor",
         "class": "sphinx.directives.other.Author",
-        "args": [],
+        "args": ["bob geldof"],
         "options": {},
         "output": ""
     },
     {
         "name": "moduleauthor",
         "class": "sphinx.directives.other.Author",
-        "args": [],
+        "args": ["ringo starr"],
         "options": {},
         "output": ""
     },
     {
         "name": "codeauthor",
         "class": "sphinx.directives.other.Author",
-        "args": [],
+        "args": ["paul mcartney"],
         "options": {},
         "output": ""
     },
     {
         "name": "index",
         "class": "sphinx.directives.other.Index",
-        "args": [],
+        "args": ["something"],
         "options": {},
-        "output": ""
+        "output": "<index entries=\"('single',\\ 'something',\\ 'index-0',\\ '',\\ None)\" inline=\"False\">\n<target ids=\"index-0\">"
     },
     {
         "name": "seealso",
@@ -364,51 +365,54 @@
     {
         "name": "tabularcolumns",
         "class": "sphinx.directives.other.TabularColumns",
-        "args": [],
+        "args": ["spec"],
         "options": {},
-        "output": ""
+        "output": "<tabular_col_spec spec=\"spec\">"
     },
     {
         "name": "centered",
         "class": "sphinx.directives.other.Centered",
-        "args": [],
+        "args": ["text"],
         "options": {},
-        "output": ""
+        "output": "<centered>\n    text"
     },
     {
         "name": "acks",
         "class": "sphinx.directives.other.Acks",
         "args": [],
         "options": {},
-        "output": ""
+        "content": "- name",
+        "output": "<acks>\n    <bullet_list>\n        <list_item>\n            <paragraph>\n                name"
     },
     {
         "name": "hlist",
         "class": "sphinx.directives.other.HList",
         "args": [],
         "options": {},
-        "output": ""
+        "content": "- item",
+        "output": "<hlist>\n    <hlistcol>\n        <bullet_list>\n            <list_item>\n                <paragraph>\n                    item\n    <hlistcol>\n        <bullet_list>"
     },
     {
         "name": "only",
         "class": "sphinx.directives.other.Only",
-        "args": [],
+        "args": ["expr"],
         "options": {},
         "output": ""
     },
     {
         "name": "include",
         "class": "sphinx.directives.other.Include",
-        "args": [],
+        "args": ["path/to/include"],
         "options": {},
         "output": ""
     },
     {
         "name": "figure",
         "class": "sphinx.directives.patches.Figure",
-        "args": [],
+        "args": ["path/to/figure"],
         "options": {},
-        "output": ""
+        "content": "caption\n\nlegend",
+        "output": "<figure>\n    <image uri=\"path/to/figure\">\n    <caption>\n        caption\n    <legend>\n        <paragraph>\n            legend"
     },
     {
         "name": "meta",
@@ -422,6 +426,7 @@
         "class": "sphinx.directives.patches.RSTTable",
         "args": [],
         "options": {},
+        "content": "| a | b |\n|---|---|\n| 1 | 2 |",
         "output": ""
     },
     {
@@ -436,41 +441,42 @@
         "class": "sphinx.directives.patches.ListTable",
         "args": [],
         "options": {},
-        "output": ""
+        "content": "* - item",
+        "output": "<table>\n    <tgroup cols=\"1\">\n        <colspec colwidth=\"100\">\n        <tbody>\n            <row>\n                <entry>\n                    <paragraph>\n                        item"
     },
     {
         "name": "code",
         "class": "sphinx.directives.patches.Code",
-        "args": [],
+        "args": ["python"],
         "options": {},
-        "output": "<code>"
+        "output": "<literal_block force=\"False\" highlight_args=\"{}\" language=\"python\" xml:space=\"preserve\">"
     },
     {
         "name": "math",
         "class": "sphinx.directives.patches.MathDirective",
         "args": [],
         "options": {},
-        "output": "<math>"
+        "output": "<math_block docname=\"mock_docname\" label=\"True\" nowrap=\"False\" number=\"True\" xml:space=\"preserve\">"
     },
     {
         "name": "deprecated",
         "class": "sphinx.domains.changeset.VersionChange",
-        "args": [],
+        "args": ["0.3"],
         "options": {},
-        "output": "<deprecated>"
+        "output": "<versionmodified type=\"deprecated\" version=\"0.3\">\n    <paragraph translatable=\"False\">\n        <inline classes=\"versionmodified deprecated\">\n            Deprecated since version 0.3."
     },
     {
         "name": "versionadded",
         "class": "sphinx.domains.changeset.VersionChange",
-        "args": [],
+        "args": ["0.2"],
         "options": {},
-        "output": "<versionadded>"
+        "output": "<versionmodified type=\"versionadded\" version=\"0.2\">\n    <paragraph translatable=\"False\">\n        <inline classes=\"versionmodified added\">\n            New in version 0.2."
     },
     {
         "name": "versionchanged",
         "class": "sphinx.domains.changeset.VersionChange",
-        "args": [],
+        "args": ["0.1"],
         "options": {},
-        "output": "<versionchanged>"
+        "output": "<versionmodified type=\"versionchanged\" version=\"0.1\">\n    <paragraph translatable=\"False\">\n        <inline classes=\"versionmodified changed\">\n            Changed in version 0.1."
     }
 ]
