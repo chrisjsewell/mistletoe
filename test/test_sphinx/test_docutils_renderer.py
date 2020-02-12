@@ -27,11 +27,13 @@ def renderer_mock():
 
 
 @pytest.fixture
-def sphinx_env():
-    from sphinx.util.docutils import docutils_namespace
+def sphinx_renderer(renderer):
+    from sphinx.util.docutils import docutils_namespace, sphinx_domains
 
     with docutils_namespace():
-        yield
+        app = renderer.mock_sphinx_env()
+        with sphinx_domains(app.env):
+            yield renderer
 
 
 def render_token(
@@ -251,24 +253,120 @@ def test_full_run(renderer, file_regression):
     file_regression.check(renderer.document.pformat(), extension=".xml")
 
 
+with open(os.path.join(os.path.dirname(__file__), "sphinx_roles.json"), "r") as fin:
+    roles_tests = json.load(fin)
+
+
+@pytest.mark.parametrize(
+    "role_data",
+    [
+        r
+        for r in roles_tests
+        if r["import"].startswith("docutils")
+        and not r["import"].endswith("unimplemented_role")
+        and not r["import"].endswith("CustomRole")
+    ],
+)
+def test_docutils_roles(renderer, role_data):
+    """"""
+    name = role_data["name"]
+    if name in ["raw"]:
+        # TODO fix skips
+        pytest.skip("awaiting fix")
+    text = "{{{0}}}`{1}`".format(name, role_data.get("content", " "))
+    print(text)
+    renderer.render(tokenize([text])[0])
+    print(
+        repr(renderer.document.pformat()).replace(" " * 8, "    ").replace('"', '\\"')
+    )
+    assert renderer.document.pformat() == (
+        role_data.get("doc_tag", '<document source="">')
+        + "\n"
+        + indent(role_data["output"], "    ")
+        + ("\n" if role_data["output"] else "")
+    )
+
+
+@pytest.mark.parametrize(
+    "role_data",
+    [
+        r
+        for r in roles_tests
+        if r["import"].startswith("sphinx")
+        # and not r["import"].endswith("unimplemented_role")
+        # and not r["import"].endswith("CustomRole")
+    ],
+)
+def test_sphinx_roles(sphinx_renderer, role_data):
+    """"""
+    name = role_data["name"]
+    if name in [
+        "c:function",
+        "c:var",
+        "cpp:function",
+        "cpp:namespace",
+        "cpp:alias",
+        "cpp:namespace-pop",
+        "cpp:namespace-push",
+        "cpp:enum-struct",
+        "cpp:enum-class",
+        "js:function",
+        "js:method",
+        "js:attribute",
+        "js:module",
+        "py:function",
+        "py:exception",
+        "py:method",
+        "py:classmethod",
+        "py:staticmethod",
+        "py:attribute",
+        "py:module",
+        "py:currentmodule",
+        "py:decorator",
+        "py:decoratormethod",
+        "rst:directive",
+        "rst:directive:option",
+        "envvar",
+        "cmdoption",
+        "glossary",
+        "productionlist",
+        "abbr",
+    ]:
+        # TODO fix skips
+        pytest.skip("awaiting fix")
+    sphinx_renderer.render(
+        tokenize(["{{{}}}`{}`".format(name, role_data.get("content", "a"))])[0]
+    )
+    print(
+        repr(sphinx_renderer.document.pformat())
+        .replace(" " * 8, "    ")
+        .replace('"', '\\"')
+    )
+    assert sphinx_renderer.document.pformat() == (
+        role_data.get("doc_tag", '<document source="">')
+        + "\n"
+        + indent(role_data["output"], "    ")
+        + ("\n" if role_data["output"] else "")
+    )
+
+
 with open(
     os.path.join(os.path.dirname(__file__), "sphinx_directives.json"), "r"
 ) as fin:
-    directives = json.load(fin)
+    directive_tests = json.load(fin)
 
 
 @pytest.mark.parametrize(
     "directive",
     [
         d
-        for d in directives
+        for d in directive_tests
         if d["class"].startswith("docutils") and not d.get("sub_only", False)
         # todo add substitution definition directive and reference role
     ],
 )
 def test_docutils_directives(renderer, directive):
     """See https://docutils.sourceforge.io/docs/ref/rst/directives.html"""
-    # TODO load and test roles
     name = directive["name"]
     if name in ["role", "rst-class", "cssclass", "line-block"]:
         # TODO fix skips
@@ -298,19 +396,18 @@ def test_docutils_directives(renderer, directive):
     "directive",
     [
         d
-        for d in directives
+        for d in directive_tests
         if d["class"].startswith("sphinx") and not d.get("sub_only", False)
     ],
 )
-def test_sphinx_directives(sphinx_env, renderer, directive):
+def test_sphinx_directives(sphinx_renderer, directive):
     """See https://docutils.sourceforge.io/docs/ref/rst/directives.html"""
     name = directive["name"]
-    if name in ["literalinclude", "csv-table", "table", "meta", "include", "only"]:
+    if name in ["csv-table", "table", "meta", "include"]:
         # TODO fix skips
         pytest.skip("awaiting fix")
     arguments = " ".join(directive["args"])
-    renderer.mock_sphinx_env()
-    renderer.render(
+    sphinx_renderer.render(
         tokenize(
             [
                 "```{{{}}} {}\n".format(name, arguments),
@@ -320,9 +417,11 @@ def test_sphinx_directives(sphinx_env, renderer, directive):
         )[0]
     )
     print(
-        repr(renderer.document.pformat()).replace(" " * 8, "    ").replace('"', '\\"')
+        repr(sphinx_renderer.document.pformat())
+        .replace(" " * 8, "    ")
+        .replace('"', '\\"')
     )
-    assert renderer.document.pformat() == (
+    assert sphinx_renderer.document.pformat() == (
         directive.get("doc_tag", '<document source="">')
         + "\n"
         + indent(directive["output"], "    ")

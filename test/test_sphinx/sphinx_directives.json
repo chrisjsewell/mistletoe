@@ -316,9 +316,9 @@
     {
         "name": "literalinclude",
         "class": "sphinx.directives.code.LiteralInclude",
-        "args": ["path/to/file"],
+        "args": ["/path/to/file"],
         "options": {},
-        "output": ""
+        "output": "<system_message level=\"2\" line=\"-1\" source=\"\" type=\"WARNING\">\n    <paragraph>\n        Include file '/srcdir/path/to/file' not found or reading it failed"
     },
     {
         "name": "toctree",
@@ -397,7 +397,7 @@
         "class": "sphinx.directives.other.Only",
         "args": ["expr"],
         "options": {},
-        "output": ""
+        "output": "<only expr=\"expr\">"
     },
     {
         "name": "include",

@@ -1,6 +1,7 @@
 from itertools import chain
 from os.path import splitext
 import re
+from unittest import mock
 from urllib.parse import urlparse, unquote
 
 from docutils import frontend, nodes, parsers
@@ -189,6 +190,7 @@ class MystParser(parsers.Parser):
 # TODO add FieldList block token, see:
 # https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#field-lists
 # TODO block comments (preferably not just HTML)
+# TODO target span (or role)
 
 
 class Role(span_token.SpanToken):
@@ -197,7 +199,8 @@ class Role(span_token.SpanToken):
     """
 
     pattern = re.compile(
-        r"(?<!\\|`)(?:\\\\)*{([-_0-9a-zA-A]*)}(`+)(?!`)(.+?)(?<!`)\2(?!`)", re.DOTALL
+        r"(?<!\\|`)(?:\\\\)*{([\:\-\_0-9a-zA-A]*)}(`+)(?!`)(.+?)(?<!`)\2(?!`)",
+        re.DOTALL,
     )
     parse_inner = False
     precedence = 6  # higher precedence than InlineCode
@@ -246,8 +249,8 @@ class DocutilsRenderer(BaseRenderer):
                 for extension in builtin_extensions:
                     self.registry.load_extension(self, extension)
                 # fresh env
-                self.doctreedir = ""
-                self.srcdir = ""
+                self.doctreedir = "/doctreedir/"
+                self.srcdir = "/srcdir/"
                 self.project = Project(srcdir="", source_suffix=".md")
                 self.project.docnames = ["mock_docname"]
                 self.env = BuildEnvironment()
@@ -507,7 +510,7 @@ class DocutilsRenderer(BaseRenderer):
         name = token.name
         # TODO role name white/black lists
         lineno = 0  # TODO get line number
-        inliner = MockInliner(self)
+        inliner = MockInliner(self, lineno)
         role_func, messages = roles.role(
             name, self.language_module, lineno, self.document.reporter
         )
@@ -627,12 +630,19 @@ class DocutilsRenderer(BaseRenderer):
 
 
 class MockInliner:
-    def __init__(self, renderer):
+    def __init__(self, renderer, lineno):
         self._renderer = renderer
         self.document = renderer.document
         self.reporter = renderer.document.reporter
+        if not hasattr(self.reporter, "get_source_and_line"):
+            # TODO this is called by some roles,
+            # but I can't see how that would work in RST?
+            self.reporter.get_source_and_line = mock.Mock(
+                return_value=(self.document.source, lineno)
+            )
         self.parent = renderer.current_node
         self.language = renderer.language_module
+        self.rfc_url = "rfc%d.html"
 
     def problematic(self, text, rawsource, message):
         msgid = self.document.set_id(message, self.parent)
@@ -650,6 +660,17 @@ class MockState:
         self._lineno = lineno
         self.document = renderer.document
         self.state_machine = state_machine
+
+        class Struct:
+            document = self.document
+            reporter = self.document.reporter
+            language = self.document.settings.language_code
+            title_styles = []
+            section_level = max(renderer._level_to_elem)
+            section_bubble_up_kludge = False
+            inliner = MockInliner(renderer, lineno)
+
+        self.memo = Struct
 
     def nested_parse(
         self,
