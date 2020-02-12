@@ -181,7 +181,7 @@ def test_math_block(renderer):
     assert renderer.document.pformat() == dedent(
         """\
     <document source="">
-        <math_block xml:space="preserve">
+        <math_block nowrap="False" number="True" xml:space="preserve">
             a
     """
     )
