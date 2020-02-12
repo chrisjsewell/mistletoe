@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from itertools import chain
 from os.path import splitext
 import re
@@ -265,6 +266,15 @@ class DocutilsRenderer(BaseRenderer):
         for child in token.children:
             self.render(child)
 
+    @contextmanager
+    def set_current_node(self, node, append=False):
+        if append:
+            self.current_node.append(node)
+        current_node = self.current_node
+        self.current_node = node
+        yield
+        self.current_node = current_node
+
     def render_document(self, token):
         # TODO deal with footnotes
         self.footnotes.update(token.footnotes)
@@ -274,11 +284,8 @@ class DocutilsRenderer(BaseRenderer):
     def render_paragraph(self, token):
         para = nodes.paragraph("")
         para.line = token.range[0]
-        self.current_node.append(para)
-        current_node = self.current_node
-        self.current_node = para
-        self.render_children(token)
-        self.current_node = current_node
+        with self.set_current_node(para, append=True):
+            self.render_children(token)
 
     def render_raw_text(self, token):
         self.current_node.append(nodes.Text(token.content, token.content))
@@ -292,28 +299,19 @@ class DocutilsRenderer(BaseRenderer):
 
     def render_strong(self, token):
         node = nodes.strong()
-        self.current_node.append(node)
-        current_node = self.current_node
-        self.current_node = node
-        self.render_children(token)
-        self.current_node = current_node
+        with self.set_current_node(node, append=True):
+            self.render_children(token)
 
     def render_emphasis(self, token):
         node = nodes.emphasis()
-        self.current_node.append(node)
-        current_node = self.current_node
-        self.current_node = node
-        self.render_children(token)
-        self.current_node = current_node
+        with self.set_current_node(node, append=True):
+            self.render_children(token)
 
     def render_quote(self, token):
         quote = nodes.block_quote()
         quote.line = token.range[0]
-        self.current_node.append(quote)
-        current_node = self.current_node
-        self.current_node = quote
-        self.render_children(token)
-        self.current_node = current_node
+        with self.set_current_node(quote, append=True):
+            self.render_children(token)
 
     def render_strikethrough(self, token):
         # TODO there is no existing node/role for this
@@ -436,10 +434,8 @@ class DocutilsRenderer(BaseRenderer):
             next_node = wrap_node
 
         self.current_node.append(next_node)
-        current_node = self.current_node
-        self.current_node = ref_node
-        self.render_children(token)
-        self.current_node = current_node
+        with self.set_current_node(ref_node):
+            self.render_children(token)
 
     def render_image(self, token):
         img_node = nodes.image()
@@ -452,10 +448,8 @@ class DocutilsRenderer(BaseRenderer):
         #     token.children[0].content = ""
 
         self.current_node.append(img_node)
-        current_node = self.current_node
-        self.current_node = img_node
-        self.render_children(token)
-        self.current_node = current_node
+        with self.set_current_node(img_node):
+            self.render_children(token)
 
     def render_list(self, token):
         list_node = None
@@ -476,20 +470,16 @@ class DocutilsRenderer(BaseRenderer):
         # list_node.line = token.range[0]
 
         self.current_node.append(list_node)
-        current_node = self.current_node
-        self.current_node = list_node
-        self.render_children(token)
-        self.current_node = current_node
+        with self.set_current_node(list_node):
+            self.render_children(token)
 
     def render_list_item(self, token):
         item_node = nodes.list_item()
         # TODO list item range
         # node.line = token.range[0]
         self.current_node.append(item_node)
-        current_node = self.current_node
-        self.current_node = item_node
-        self.render_children(token)
-        self.current_node = current_node
+        with self.set_current_node(item_node):
+            self.render_children(token)
 
     def render_table(self, token):
         table = nodes.table()
@@ -507,36 +497,26 @@ class DocutilsRenderer(BaseRenderer):
         if hasattr(token, "header"):
             thead = nodes.thead()
             tgroup += thead
-            current_node = self.current_node
-            self.current_node = thead
-            self.render_table_row(token.header)
-            self.current_node = current_node
+            with self.set_current_node(thead):
+                self.render_table_row(token.header)
 
         tbody = nodes.tbody()
         tgroup += tbody
 
-        current_node = self.current_node
-        self.current_node = tbody
-        self.render_children(token)
-        self.current_node = current_node
+        with self.set_current_node(tbody):
+            self.render_children(token)
 
         self.current_node.append(table)
 
     def render_table_row(self, token):
         row = nodes.row()
-        self.current_node.append(row)
-        current_node = self.current_node
-        self.current_node = row
-        self.render_children(token)
-        self.current_node = current_node
+        with self.set_current_node(row, append=True):
+            self.render_children(token)
 
     def render_table_cell(self, token):
         entry = nodes.entry()
-        self.current_node.append(entry)
-        current_node = self.current_node
-        self.current_node = entry
-        self.render_children(token)
-        self.current_node = current_node
+        with self.set_current_node(entry, append=True):
+            self.render_children(token)
 
     def render_auto_link(self, token):
         # TODO render_auto_link
