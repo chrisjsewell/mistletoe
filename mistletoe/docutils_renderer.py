@@ -3,7 +3,7 @@ from os.path import splitext
 import re
 from urllib.parse import urlparse, unquote
 
-from docutils import nodes
+from docutils import frontend, nodes, parsers
 from docutils.frontend import OptionParser
 from docutils.languages import get_language
 from docutils.parsers.rst import directives, DirectiveError, roles
@@ -17,6 +17,177 @@ from mistletoe.base_renderer import BaseRenderer
 from mistletoe.latex_token import Math
 
 from mistletoe import span_token
+
+
+class MystParser(parsers.Parser):
+    """Docutils parser for CommonMark + Math + Tables + RST Extensions """
+
+    supported = ("md", "markdown")
+    translate_section_name = None
+
+    default_config = {"known_url_schemes": None}
+
+    settings_spec = (
+        "Myst Parser Options",
+        None,
+        (
+            (
+                'Recognize and link to standalone PEP references (like "PEP 258").',
+                ["--pep-references"],
+                {"action": "store_true", "validator": frontend.validate_boolean},
+            ),
+            (
+                "Base URL for PEP references "
+                '(default "http://www.python.org/dev/peps/").',
+                ["--pep-base-url"],
+                {
+                    "metavar": "<URL>",
+                    "default": "http://www.python.org/dev/peps/",
+                    "validator": frontend.validate_url_trailing_slash,
+                },
+            ),
+            (
+                'Template for PEP file part of URL. (default "pep-%04d")',
+                ["--pep-file-url-template"],
+                {"metavar": "<URL>", "default": "pep-%04d"},
+            ),
+            (
+                'Recognize and link to standalone RFC references (like "RFC 822").',
+                ["--rfc-references"],
+                {"action": "store_true", "validator": frontend.validate_boolean},
+            ),
+            (
+                'Base URL for RFC references (default "http://tools.ietf.org/html/").',
+                ["--rfc-base-url"],
+                {
+                    "metavar": "<URL>",
+                    "default": "http://tools.ietf.org/html/",
+                    "validator": frontend.validate_url_trailing_slash,
+                },
+            ),
+            (
+                "Set number of spaces for tab expansion (default 8).",
+                ["--tab-width"],
+                {
+                    "metavar": "<width>",
+                    "type": "int",
+                    "default": 8,
+                    "validator": frontend.validate_nonnegative_int,
+                },
+            ),
+            (
+                "Remove spaces before footnote references.",
+                ["--trim-footnote-reference-space"],
+                {"action": "store_true", "validator": frontend.validate_boolean},
+            ),
+            (
+                "Leave spaces before footnote references.",
+                ["--leave-footnote-reference-space"],
+                {"action": "store_false", "dest": "trim_footnote_reference_space"},
+            ),
+            (
+                "Disable directives that insert the contents of external file "
+                '("include" & "raw"); replaced with a "warning" system message.',
+                ["--no-file-insertion"],
+                {
+                    "action": "store_false",
+                    "default": 1,
+                    "dest": "file_insertion_enabled",
+                    "validator": frontend.validate_boolean,
+                },
+            ),
+            (
+                "Enable directives that insert the contents of external file "
+                '("include" & "raw").  Enabled by default.',
+                ["--file-insertion-enabled"],
+                {"action": "store_true"},
+            ),
+            (
+                'Disable the "raw" directives; replaced with a "warning" '
+                "system message.",
+                ["--no-raw"],
+                {
+                    "action": "store_false",
+                    "default": 1,
+                    "dest": "raw_enabled",
+                    "validator": frontend.validate_boolean,
+                },
+            ),
+            (
+                'Enable the "raw" directive.  Enabled by default.',
+                ["--raw-enabled"],
+                {"action": "store_true"},
+            ),
+            (
+                "Token name set for parsing code with Pygments: one of "
+                '"long", "short", or "none (no parsing)". Default is "long".',
+                ["--syntax-highlight"],
+                {
+                    "choices": ["long", "short", "none"],
+                    "default": "long",
+                    "metavar": "<format>",
+                },
+            ),
+            (
+                "Change straight quotation marks to typographic form: "
+                'one of "yes", "no", "alt[ernative]" (default "no").',
+                ["--smart-quotes"],
+                {
+                    "default": False,
+                    "metavar": "<yes/no/alt>",
+                    "validator": frontend.validate_ternary,
+                },
+            ),
+            (
+                'Characters to use as "smart quotes" for <language>. ',
+                ["--smartquotes-locales"],
+                {
+                    "metavar": "<language:quotes[,language:quotes,...]>",
+                    "action": "append",
+                    "validator": frontend.validate_smartquotes_locales,
+                },
+            ),
+            (
+                "Inline markup recognized at word boundaries only "
+                "(adjacent to punctuation or whitespace). "
+                "Force character-level inline markup recognition with "
+                '"\\ " (backslash + space). Default.',
+                ["--word-level-inline-markup"],
+                {"action": "store_false", "dest": "character_level_inline_markup"},
+            ),
+            (
+                "Inline markup recognized anywhere, regardless of surrounding "
+                "characters. Backslash-escapes must be used to avoid unwanted "
+                "markup recognition. Useful for East Asian languages. "
+                "Experimental.",
+                ["--character-level-inline-markup"],
+                {
+                    "action": "store_true",
+                    "default": False,
+                    "dest": "character_level_inline_markup",
+                },
+            ),
+        ),
+    )
+
+    config_section = "myst parser"
+    config_section_dependencies = ("parsers",)
+
+    def parse(self, inputstring, document):
+        # TODO add conf.py configurable settings
+        self.config = self.default_config.copy()
+        try:
+            new_cfg = self.document.settings.env.config.myst_config
+            self.config.update(new_cfg)
+        except AttributeError:
+            pass
+        renderer = DocutilsRenderer(document=document)
+        with renderer:
+            renderer.render(Document(inputstring))
+
+
+# TODO add FieldList block token, see:
+# https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#field-lists
 
 
 class Role(span_token.SpanToken):
@@ -39,19 +210,19 @@ class Role(span_token.SpanToken):
 
 
 class DocutilsRenderer(BaseRenderer):
-    def __init__(self, extras=(), document=None, current_node=None):
+    def __init__(self, extras=(), document=None, current_node=None, config=None):
         """
         Args:
             extras (list): allows subclasses to add even more custom tokens.
         """
         self.document = document
+        self.config = config or {}
         if self.document is None:
             settings = OptionParser(components=(RSTParser,)).get_default_values()
             self.document = new_document("", settings=settings)
         self.current_node = current_node or self.document
         self.language_module = self.document.settings.language_code
         get_language(self.language_module)
-        self._directive_regex = re.compile(r"^\{.*\}\+?$")
         self._level_to_elem = {0: self.document}
         super().__init__(*chain((Math, Role), extras))
 
@@ -139,14 +310,14 @@ class DocutilsRenderer(BaseRenderer):
     def render_math(self, token):
         if token.content.startswith("$$"):
             content = token.content[2:-2]
-            node = nodes.math_block(content, content)
+            node = nodes.math_block(content, content, nowrap=False, number=None)
         else:
             content = token.content[1:-1]
             node = nodes.math(content, content)
         self.current_node.append(node)
 
     def render_block_code(self, token):
-        if self._directive_regex.match(token.language):
+        if token.language.startswith("{") and token.language.endswith("}"):
             return self.render_directive(token)
         text = token.children[0].content
         node = nodes.literal_block(text, text, language=token.language)
@@ -228,7 +399,7 @@ class DocutilsRenderer(BaseRenderer):
         # If there's not a url scheme (e.g. 'https' for 'https:...' links),
         # or there is a scheme but it's not in the list of known_url_schemes,
         # then assume it's a cross-reference and pass it to Sphinx as an `:any:` ref.
-        known_url_schemes = False  # self.config.get('known_url_schemes')
+        known_url_schemes = self.config.get("known_url_schemes", None)
         if known_url_schemes:
             scheme_known = url_check.scheme in known_url_schemes
         else:
@@ -306,6 +477,7 @@ class DocutilsRenderer(BaseRenderer):
         self.current_node = current_node
 
     def render_table(self, token):
+        # TODO render_table
         raise NotImplementedError
 
     def render_table_row(self, token):
@@ -315,6 +487,7 @@ class DocutilsRenderer(BaseRenderer):
         raise NotImplementedError
 
     def render_auto_link(self, token):
+        # TODO render_auto_link
         raise NotImplementedError
 
     def render_role(self, token):
@@ -345,8 +518,8 @@ class DocutilsRenderer(BaseRenderer):
         name = token.language[1:-1]
         content = token.children[0].content
         options = {}
-        if name.endswith("}"):
-            name = name[:-1]
+        if content.startswith("---"):
+            content = "\n".join(content.splitlines()[1:])
             # get YAML options
             match = re.search(r"^-{3,}", content, re.MULTILINE)
             if match:
@@ -456,6 +629,8 @@ class MockInliner:
         message.add_backref(prbid)
         return problematic
 
+    # TODO add parse method
+
 
 class MockState:
     def __init__(self, renderer, state_machine, lineno):
@@ -481,13 +656,15 @@ class MockState:
         nested_renderer.render(Document(block))
 
     def inline_text(self, text, lineno):
+        # TODO return messages?
         messages = []
-        renderer = DocutilsRenderer()
-        document = renderer.render(Document(text))
+        paragraph = nodes.paragraph("")
+        renderer = DocutilsRenderer(document=self.document, current_node=paragraph)
+        renderer.render(Document(text))
         textnodes = []
-        if document.children:
+        if paragraph.children:
             # first child should be paragraph
-            textnodes = document.children[0].children
+            textnodes = paragraph.children[0].children
         return textnodes, messages
 
     def block_quote(self, indented, line_offset):

@@ -236,7 +236,7 @@ def test_full_run(renderer, file_regression):
 
 
 with open(
-    os.path.join(os.path.dirname(__file__), "samples", "sphinx_directives.json"), "r"
+    os.path.join(os.path.dirname(__file__), "sphinx_directives.json"), "r"
 ) as fin:
     directives = json.load(fin)
 
