@@ -300,6 +300,8 @@ def test_docutils_roles(renderer, role_data):
 def test_sphinx_roles(sphinx_renderer, role_data):
     """"""
     name = role_data["name"]
+    # note, I think most of these have are actually node types rather than roles,
+    # that I've erroneously picked up in my gather function.
     if name in [
         "c:function",
         "c:var",

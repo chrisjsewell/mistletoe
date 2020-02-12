@@ -6,6 +6,7 @@ import pytest
 from mistletoe import Document
 from mistletoe.html_renderer import HTMLRenderer
 from mistletoe.latex_token import Math
+from mistletoe.docutils_renderer import Role
 
 with open(os.path.join(os.path.dirname(__file__), "commonmark.json"), "r") as fin:
     tests = json.load(fin)
@@ -14,6 +15,6 @@ with open(os.path.join(os.path.dirname(__file__), "commonmark.json"), "r") as fi
 @pytest.mark.parametrize("entry", tests)
 def test_commonmark(entry):
     test_case = entry["markdown"].splitlines(keepends=True)
-    with HTMLRenderer(Math) as renderer:
+    with HTMLRenderer(Math, Role) as renderer:
         output = renderer.render(Document(test_case))
     assert entry["html"] == output
